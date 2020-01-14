@@ -21,17 +21,29 @@
 ! kb and mb are int arrays from [0, 31]
       dimension kb(0:31),mb(0:31)
 
+! debugging
+      dimension kbo(0:31),mbo(0:31)
+
 ! we print every character in the array kb
 ! 1003 = ' key '
       write(*,1003)
 
 ! reads in the key as a series of ints into kb
 ! format(32z1.1)
-      read(*,1004) (kb(i),i=0,31)
+!!      read(*,1004) (kb(i),i=0,31)
 
+      kb = (/0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0/)
+    
+      mb = (/10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11/)
+
+
+      kbo = (/0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0/)
+    
+      mbo = (/10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11/)
 
       write(*,1005)
-      read(*,1006) (mb(i),i=0,31)
+!!      read(*,1006) (mb(i),i=0,31)
+
 
       call expand(message,mb,32)
       call expand(key,kb,32)
@@ -55,6 +67,12 @@
       write(*,1007) (kb(i),i=0,31)
       write(*,1005)
       write(*,1007) (mb(i),i=0,31)
+      
+      if(all(kb.eq.kbo).and.all(mb.eq.mbo)) then
+      write(*,*) "PASS"
+      else
+      write(*,*) "FAIL"
+      endif
 
 1000  format(' key '/16(1x,i1))
 1001  format(' plain '/16(1x,i1))
