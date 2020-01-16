@@ -1,34 +1,19 @@
       program luc
       implicit none
 
-! variables
       integer :: i
 
-! I am pretty certain this is a data initializer for int arrays k and m
-! such that k is a 2-dimensional from [0, 7] and [0, 15]; and that
-! m is a 3-dimensional from [0, 7], [0, 7], and [0, 1]
       integer, dimension (0:7,0:15) :: k
       integer, dimension (0:7,0:7,0:1) :: m
 
-! key is an array of ints with index [0, 127]
-! message is an array of ints with index [0, 127]
       integer, dimension (0:127) :: key, message
 
-! pointer aliasing...? use reshape()
-      equivalence (k(0,0),key(1)),(m(0,0,0),message(1))
-
-! kb and mb are int arrays from [0, 31]
       integer, dimension (0:31) :: kb, mb
 
-! debugging
       integer, dimension (0:31) :: kbo, mbo
 
-! we print every character in the array kb
-! 1003 = ' key '
       write(*,*) ' key '
 
-! reads in the key as a series of ints into kb
-! format(32z1.1)
 !!      read(*,1004) (kb(i),i=0,31)
 
       kb = (/0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0/)
@@ -53,10 +38,11 @@
       write(*,1001) (message(i), i=0,127)
       1001 format(' plain '/16(1x,i1))
 
-! 0 in the first lucifer argument means encipher
+      k = reshape(key, (/8, 16/))
+      m = reshape(key, (/8, 8, 2/))
+
       call lucifer(0, k, m)
 
-! 1 in the first lucifer argument means decipher
       call lucifer(1, k, m)
 
       write(*,1001) (message(i),i=0,127)
