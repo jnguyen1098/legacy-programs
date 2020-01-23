@@ -1,114 +1,156 @@
-#define AUTOPILOT 1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       program luc
 !
-!   this program implements the 'Lucifer' cipher, the
+!   This program implements the 'Lucifer' cipher, the
 !   direct predecessor of the DES algorithm.
 !
 !   Jason Nguyen (1013950)
 !
       implicit none
 
+!   Temp counter used to iterate through arrays
       integer :: i
 
-      integer, dimension (0:7,0:15) :: k
+!   kb is the raw input from the user, representing the 32 bytes
+!   kb is then expanded into key, from an array of bytes to binary.
+!
+!   Now, we need to read key as an array of 8 x 16, not just a line
+!   of 128 binary integers. So we later reshape key (1 x 128) into
+!   k (8 x 16) by means of reshape()
+      integer, dimension (0:31) :: kb
+      integer, dimension (0:127) :: key
+      integer, dimension (0:7, 0:15) :: k
+
+!   The same story applies here. We read 32 bytes into the message
+!   plaintext, and then we use expand() to turn mb, an array of 32
+!   bytes, into a binary representation of 128 binary digits. The
+!   only difference here is that instead of the 1 x 128 array being
+!   mapped onto an 8 x 16 array, we are mapping it to 8 x 8 x 2
+      integer, dimension (0:31) :: mb
+      integer, dimension (0:127) :: message
       integer, dimension (0:7,0:7,0:1) :: m
 
-      integer, dimension (0:127) :: key, message
-
-      integer, dimension (0:31) :: kb, mb
-
-      integer, dimension (0:31) :: kbo, mbo
-
+!   Prompt the user for the key first
       print *, ' key '
-
-#if AUTOPILOT == 0
       read(*,1004) (kb(i),i=0,31)
 1004  format(32z1.1)
-#else
-      kb = (/0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0/)
-    
-      mb = (/10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11/)
 
-
-      kbo = (/0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0/)
-    
-      mbo = (/10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11/)
-#endif
-
+!   Prompt the user for the plaintext next
       print *, ' plain '
-
-#if AUTOPILOT == 0
       read(*,1006) (mb(i),i=0,31)
 1006  format(32z1.1)
-#endif
 
-      call expand(message,mb,32)
-      call expand(key,kb,32)
+!   Expand both the message (mb) and key (kb) as explained above
+      call expand(message, mb, 32)
+      call expand(key, kb, 32)
 
+!   Print the resultant expanded binary key
       print 1000, (key(i), i = 0, 127)
-1000 format(' key '/16(1x, i1))
+1000  format(' key '/16(1x, i1))
 
+!   Print the resultant expanded binary plaintext message
       print 1001, (message(i), i = 0, 127)
 
+!   Reshape key and message from (1 x 128) to their respective
+!   mappings. (8 x 16) for key, (8 x 8 x 2) for message.
       k = reshape(key, (/8, 16/))
-      m = reshape(key, (/8, 8, 2/))
+      m = reshape(message, (/8, 8, 2/))
 
+!   First we encipher with the lucifer function. This is shown
+!   by the first argument being 0.
       call lucifer(0, k, m)
 
+!   Next, we decipher with the lucifer function. This is shown
+!   by the first argument being 1.
       call lucifer(1, k, m)
 
+!   Print the resultant plaintext again in binary array format
       print 1001, (message(i), i = 0, 127)
 
+!   Finally, we compress the resultant message and key
       call compress(message, mb, 32)
       call compress(key, kb, 32)
 
+!   Then we print them both again for debugging purposes . . .
       print *, ' key '
       print 1007, (kb(i), i = 0, 31)
 
+!   . . . so if the program ran successfully, the key and plain
+!   should be identical to the key and plain at the beginning
       print *, ' plain '
       print 1007, (mb(i), i = 0, 31)
 
+!   Formatting that exists in more than one place, that would
+!   be better sought out at the bottom of the program
 1007 format(1x, 32z1.1)
 1001 format(' plain '/16(1x, i1))
 1002 format(' cipher '/16(1x,i1))
 
-#if AUTOPILOT == 1
-      if(all(kb == kbo).and.all(mb == mbo)) then
-         print *, "PASS"
-      else
-         print *, "FAIL"
-      endif
-#else
-      print *, "PASS"
-#endif
       end program luc
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       subroutine lucifer(d,k,m)
+!   This algorithm uses Feistel rounds. As in, it encrypted the data
+!   by performing an encipherment step on it several times. This
+!   encipherment step involved taking the key for that step, and half
+!   of the block in order to produce a result to be applied to the XOR
+!   of the remnant half of the block.
+!
+!   What made this solution particularly elegant was that the two
+!   halves of the block would be switched after each step, allowing
+!   each subsequent operation of the same type to evenly operate on all
+!   parts of the respective block.
       implicit none
 
-!     arguments
-      integer, intent(in) :: d
-      integer, dimension (0:7, 0:15), intent(in) :: k
-      integer, dimension (0:7, 0:7, 0:1), intent(inout) :: m
+!   Function arguments
+      integer, intent(in) :: d ! mode; 0 = cipher, 1 = decipher
+      integer, dimension (0:7, 0:15), intent(in) :: k ! key
+      integer, dimension (0:7, 0:7, 0:1), intent(inout) :: m ! message
 
-!     diffusion pattern
+!   Diffusion pattern
       integer, dimension (0:7) :: o = (/7, 6, 2, 1, 5, 0, 3, 4/)
 
-!     inverse of fixed permutation
+!   Inverse of fixed permutation
       integer, dimension (0:7) :: tr, pr = (/2, 5, 4, 0, 3, 1, 7, 6/)
 
-!     S-box permutations
+!   S-box permutations, S_0
       integer, dimension (0:15) :: s0 = (/12, 15, 7, 10, 14, 13, 11, &
               0, 2, 6, 3, 1, 9, 4, 5, 8/)
+
+!   S-box permutations, S_1
       integer, dimension (0:15) :: s1 = (/7, 2, 14, 9, 3, 11, 0, 4, &
               12, 13, 1, 10, 6, 15, 8, 5/)
 
-!     other variables
-      integer :: h0, h1, h, ii, jj, jjj, kc, kk, ks, l, v
-      integer, dimension (0:7,0:7) :: sw
+!   Other variables
+      integer :: h0, h1, h, ii, jj, kc, kk, ks, l, temp, v
+      integer, dimension (0:7,0:7) :: swap_temp
 
-      h0 = 0
-      h1 = 1
+!   Unlike the original implementation that involved physically moving
+!   information, this implementation saves the effort by using pointers
+!   to indicate which part of the array(s) the algorithm works on.
+
+!   The halves of the message byte selected are used as input to the
+!   S_0 and S_1 permutations in order to create 4 v-bits each.
+
+!   When k(jj, ks) = 0, the low-order  4 bits are used with s0
+!                       the high-order 4 bits are used with s1
+
+!   When k(jj, ks) = 1, the low-order  4 bits are used with s1
+!                       the high-order 4 bits are used with s0
+
+!      +-------------------+-----+-----+
+!      |                   |  0  |  1  |
+!      +-------------------+-----+-----+
+!      | Low-Order 4 Bits  | s_0 | s_1 |
+!      +-------------------+-----+-----+
+!      | High-Order 4 Bits | s_1 | s_0 |
+!      +-------------------+-----+-----+
+
+!   Like stated earlier, we only point to the halves of the block:
+
+      h0 = 0 !   lower half of the block
+      h1 = 1 !   upper half of the block
 
       if (d == 1) then
          kc = 8
@@ -116,15 +158,27 @@
          kc = 0
       end if
 
+!   Sorkin's variant of Lucifer uses 16 Feistel rounds
       do ii = 1, 16
+
+!        c-i-d (confusion, interruption, diffusion) cycle
          if (d == 1) then
             kc = mod(kc + 1, 16)
          end if
+
+!        ks is the index of the 'transform control byte'
          ks = kc
 
          do jj = 0, 7
             l = 0
             h = 0
+
+!           Here we construct the integer values of the hexdigits of
+!           one byte of the message. We could have used compress(),
+!           but this method is somewhat faster.
+
+!           h and l were originally references to c(0) and c(1) as
+!           per the equivalence, but I removed those out of clarity.
 
             do kk = 0, 3
                l = l * 2 + m(7 - kk, jj, h1)
@@ -134,15 +188,24 @@
                h = h * 2 + m(7 - kk, jj, h1)
             end do
 
+!           The document in verbatim referred to this as "controlled
+!           interchange and s-box permutation, whatever that means.
             v = (s0(l) + 16*s1(h)) * (1 - k(jj, ks)) + (s0(h) + 16 * &
                     s1(l)) * k(jj, ks)
 
+!           Here we convert v back into bit array format. We could have
+!           used expand(), but this is faster.
             do kk = 0, 7
                tr(kk) = mod(v, 2)
                v = v / 2
             end do
 
-            do kk=0, 7
+!           Here we do key-interruption and diffusion, combined. The 
+!           "k + tr" term is the permuted key interruption.
+!
+!           mod(o(kk) + jj, 8) is the diffusion row for column kk.
+!           row = byte and column = bit within byte
+            do kk= 0, 7
                m(kk, mod(o(kk) + jj, 8), h0) = mod(k(pr(kk), kc) + &
                        tr(pr(kk)) + m(kk, mod(o(kk) + jj, 8), h0), 2)
             end do
@@ -153,31 +216,39 @@
 
          end do
 
-         jjj = h0
+!        As we established earlier, h0 and h1 are merely pointers to
+!        the halves of the blocks we intend to work on. As we have
+!        reached the end of the Feistel round, we have to swap h0 and
+!        h1. We do so by using temp as a temporary buffer variable.
+         temp = h0
          h0 = h1
-         h1 = jjj
+         h1 = temp
 
-      end do
+      end do ! end of Feistel round
 
+!     Here we physically swap the upper and lower halves of the message
+!     after the last of the sixteen Feistel rounds completes.
       do jj = 0,7
          do kk = 0,7
-            sw(kk, jj) = m(kk, jj, 0)
+            swap_temp(kk, jj) = m(kk, jj, 0)
             m(kk, jj, 0) = m(kk, jj, 1)
-            m(kk, jj, 1) = sw(kk, jj)
+            m(kk, jj, 1) = swap_temp(kk, jj)
          end do
       end do
 
       return 
       end subroutine lucifer
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       subroutine expand(a, b, l)
       implicit none
 
-      integer, dimension(0:*), intent(out) :: a
-      integer, dimension(0:*), intent(in) :: b
-      integer, intent(in) :: l
+      integer, dimension(0:*), intent(out) :: a ! array in bit format
+      integer, dimension(0:*), intent(in) :: b ! array in byte format
+      integer, intent(in) :: l ! length of the array, b, in hexdigits
 
-      integer :: i, j, v
+      integer :: i, j, v ! temporary variables
 
       do i = 0, l - 1
          v = b(i)
@@ -190,14 +261,16 @@
       return
       end
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       subroutine compress(a,b,l)
       implicit none
 
-      integer, dimension(0:*), intent(in) :: a
-      integer, dimension(0:*), intent(out) :: b
-      integer, intent(in) :: l
+      integer, dimension(0:*), intent(in) :: a  !  array in bit format
+      integer, dimension(0:*), intent(out) :: b ! array in byte format
+      integer, intent(in) :: l  ! length of the array, b, in hexdigits
 
-      integer :: j, v
+      integer :: j, v ! temporary variables
 
       v = 0
 
@@ -208,3 +281,5 @@
       b(l - 1) = v
       return
       end subroutine compress
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
