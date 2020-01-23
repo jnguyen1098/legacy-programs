@@ -28,28 +28,30 @@
 !   mapped onto an 8 x 16 array, we are mapping it to 8 x 8 x 2
       integer, dimension (0:31) :: mb
       integer, dimension (0:127) :: message
-      integer, dimension (0:7,0:7,0:1) :: m
+      integer, dimension (0:7, 0:7, 0:1) :: m
 
 !   Prompt the user for the key first
-      print *, ' key '
-      read(*,1004) (kb(i),i=0,31)
-1004  format(32z1.1)
+      print *, ' '
+      print *, 'Enter your key (32 char):'
+      read(*,'(32z1.1)') (kb(i),i=0,31)
 
 !   Prompt the user for the plaintext next
-      print *, ' plain '
-      read(*,1006) (mb(i),i=0,31)
-1006  format(32z1.1)
+      print *, ' '
+      print *, 'Enter plaintext (32 char):'
+      read(*,'(32z1.1)') (mb(i),i=0,31)
 
 !   Expand both the message (mb) and key (kb) as explained above
       call expand(message, mb, 32)
       call expand(key, kb, 32)
 
+#ifdef DEBUG
 !   Print the resultant expanded binary key
       print 1000, (key(i), i = 0, 127)
 1000  format(' key '/16(1x, i1))
 
 !   Print the resultant expanded binary plaintext message
       print 1001, (message(i), i = 0, 127)
+#endif
 
 !   Reshape key and message from (1 x 128) to their respective
 !   mappings. (8 x 16) for key, (8 x 8 x 2) for message.
@@ -60,31 +62,45 @@
 !   by the first argument being 0.
       call lucifer(0, k, m)
 
+!   Begin section 'Encrypted message'
+      print *, ''
+      print *, '~~~~~~Encrypted message~~~~~~'
+
+!   Print ciphertext
+      print *, 'Ciphertext:'
+      call compress(m, mb, 32)
+      print '(32z1.1)', (mb(i), i = 0, 31)
+
 !   Next, we decipher with the lucifer function. This is shown
 !   by the first argument being 1.
       call lucifer(1, k, m)
 
+#ifdef DEBUG
 !   Print the resultant plaintext again in binary array format
       print 1001, (message(i), i = 0, 127)
+#endif
 
 !   Finally, we compress the resultant message and key
       call compress(message, mb, 32)
       call compress(key, kb, 32)
 
+!   Begin section 'Decrypted message'
+      print *, ' '
+      print *, '~~~~~~Decrypted message~~~~~~'
+
 !   Then we print them both again for debugging purposes . . .
-      print *, ' key '
-      print 1007, (kb(i), i = 0, 31)
+      print *, 'Key:'
+      print '(32z1.1)', (kb(i), i = 0, 31)
 
 !   . . . so if the program ran successfully, the key and plain
 !   should be identical to the key and plain at the beginning
-      print *, ' plain '
-      print 1007, (mb(i), i = 0, 31)
+      print *, 'Plaintext:'
+      print '(32z1.1)', (mb(i), i = 0, 31)
+      print *, ' '
 
-!   Formatting that exists in more than one place, that would
-!   be better sought out at the bottom of the program
-1007 format(1x, 32z1.1)
-1001 format(' plain '/16(1x, i1))
-1002 format(' cipher '/16(1x,i1))
+#ifdef DEBUG
+1001 format('plain'/16(1x, i1))
+#endif
 
       end program luc
 
@@ -200,7 +216,7 @@
                v = v / 2
             end do
 
-!           Here we do key-interruption and diffusion, combined. The 
+!           Here we do key-interruption and diffusion, combined. The
 !           "k + tr" term is the permuted key interruption.
 !
 !           mod(o(kk) + jj, 8) is the diffusion row for column kk.
@@ -236,7 +252,7 @@
          end do
       end do
 
-      return 
+      return
       end subroutine lucifer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -266,20 +282,21 @@
       subroutine compress(a,b,l)
       implicit none
 
-      integer, dimension(0:*), intent(in) :: a  !  array in bit format
+      integer, dimension(0:*), intent(in) :: a   ! array in bit format
       integer, dimension(0:*), intent(out) :: b ! array in byte format
       integer, intent(in) :: l  ! length of the array, b, in hexdigits
 
-      integer :: j, v ! temporary variables
+      integer :: i, j, v
 
-      v = 0
-
-      do j = 0, 3
-         v = v * 2 + mod(a(j + (l - 1) * 4), 2)
+      do i=0,l-1,1
+         v=0
+         do j=0,3,1
+            v = v * 2 + mod(a(j + i * 4), 2)
+         end do
+         b(i)=v
       end do
 
-      b(l - 1) = v
       return
-      end subroutine compress
+      end
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
