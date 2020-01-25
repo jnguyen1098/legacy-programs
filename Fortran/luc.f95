@@ -44,15 +44,6 @@
       call expand(message, mb, 32)
       call expand(key, kb, 32)
 
-#ifdef 0
-!   Print the resultant expanded binary key
-      print 1000, (key(i), i = 0, 127)
-1000  format(' key '/16(1x, i1))
-
-!   Print the resultant expanded binary plaintext message
-      print 1001, (message(i), i = 0, 127)
-#endif
-
 !   Reshape key and message from (1 x 128) to their respective
 !   mappings. (8 x 16) for key, (8 x 8 x 2) for message.
       k = reshape(key, [8, 16])
@@ -75,11 +66,6 @@
 !   by the first argument being 1.
       call lucifer(1, k, m)
 
-#ifdef 0
-!   Print the resultant plaintext again in binary array format
-      print 1001, (message(i), i = 0, 127)
-#endif
-
 !   Finally, we compress the resultant message and key
       call compress(message, mb, 32)
       call compress(key, kb, 32)
@@ -97,10 +83,6 @@
       print *, 'Plaintext:'
       print '(32z1.1)', (mb(i), i = 0, 31)
       print *, ' '
-
-#ifdef 0
-1001 format('plain'/16(1x, i1))
-#endif
 
       end program luc
 

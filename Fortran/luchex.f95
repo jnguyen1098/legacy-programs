@@ -36,30 +36,15 @@
       integer, dimension (0:19) :: hexword
       integer :: hexlength
 
-#if 0
-      character (len = 11) :: w
-      integer, dimension (0:19) :: hexword
-      integer :: hexlength
-      call readWord(w)
-      if (len_trim(w) < 1 .or. len_trim(w) > 10) then
-         print *, 'Error: word must be between 1 and 10 chars. &
-         Terminating program.'
-         stop
-      end if
-
-      call word2hex(w, hexword, hexlength)
-
-      call printhex(hexword, hexlength)
-#endif
-
 !   Prompt the user for the key first
+      print *, '~~~~~~~~~~User Input~~~~~~~~~~~'
       print *, ' '
       print *, 'Enter your key (32 char):'
       read(*,'(32z1.1)') (kb(i),i=0,31)
 
 !   Prompt the user for the plaintext word
       print *, ' '
-      print *, 'Enter word:'
+      print *, 'Enter your word:'
       call readWord(w)
 
 !   Word length checking (1 - 10 chars)
@@ -75,19 +60,11 @@
       print *, ' '
       print *, 'Hexadecimal word'
       call printhex(hexword, hexlength)
+      print *, ' '
 
 !   Expand both the message (mb) and key (kb) as explained above
-      call expand(message, mb, 32)
+      call expand(message, hexword, hexlength)
       call expand(key, kb, 32)
-
-#ifdef DEBUG
-!   Print the resultant expanded binary key
-      print 1000, (key(i), i = 0, 127)
-1000  format(' key '/16(1x, i1))
-
-!   Print the resultant expanded binary plaintext message
-      print 1001, (message(i), i = 0, 127)
-#endif
 
 !   Reshape key and message from (1 x 128) to their respective
 !   mappings. (8 x 16) for key, (8 x 8 x 2) for message.
@@ -99,8 +76,9 @@
       call lucifer(0, k, m)
 
 !   Begin section 'Encrypted message'
-      print *, ''
-      print *, '~~~~~~Encrypted message~~~~~~'
+      print *, ' '
+      print *, '~~~~~~~Encrypted message~~~~~~~'
+      print *, ' '
 
 !   Print ciphertext
       print *, 'Ciphertext:'
@@ -111,18 +89,14 @@
 !   by the first argument being 1.
       call lucifer(1, k, m)
 
-#ifdef DEBUG
-!   Print the resultant plaintext again in binary array format
-      print 1001, (message(i), i = 0, 127)
-#endif
-
 !   Finally, we compress the resultant message and key
       call compress(message, mb, 32)
       call compress(key, kb, 32)
 
 !   Begin section 'Decrypted message'
       print *, ' '
-      print *, '~~~~~~Decrypted message~~~~~~'
+      print *, '~~~~~~~Decrypted message~~~~~~~'
+      print *, ' '
 
 !   Then we print them both again for debugging purposes . . .
       print *, 'Key:'
@@ -130,13 +104,11 @@
 
 !   . . . so if the program ran successfully, the key and plain
 !   should be identical to the key and plain at the beginning
+      print *, ' '
       print *, 'Plaintext:'
       print '(32z1.1)', (mb(i), i = 0, 31)
       print *, ' '
-
-#ifdef DEBUG
-1001 format('plain'/16(1x, i1))
-#endif
+      print *, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
       end program luchex
 
