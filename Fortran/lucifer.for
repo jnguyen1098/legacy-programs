@@ -4,7 +4,6 @@
       data handle/0/
       dimension k(0:7,0:15),m(0:7,0:7,0:1)
       dimension key(0:127), message(0:127)
-      equivalence (k(0,0),key(1)),(m(0,0,0),message(1))
 
       dimension kb(0:31),mb(0:31),cb(0:31)
       write(*,1003)
@@ -19,10 +18,13 @@
       write(*,1000) (key(i), i=0,127)
       write(*,1001) (message(i), i=0,127)
 
+      k = reshape(key, [8, 16])
+      m = reshape(message, [8, 8, 2])
+
       d=0
       call lucifer(d,k,m)
 
-      call compress(message, cb, 32)
+      call compress(m, cb, 32)
       write(*,1007)(cb(i),i=0,31)
 
       d=1

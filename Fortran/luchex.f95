@@ -1,11 +1,12 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      program luc
-!
-!   This program implements the 'Lucifer' cipher, the
-!   direct predecessor of the DES algorithm.
-!
-!   Jason Nguyen (1013950)
-!
+!                                                                     !
+!                                Lucifer                              !
+!                                                                     !
+!                         Jason Nguyen (1013950)                      !
+!                                                                     !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      program luchex
+      use hex
       implicit none
 
 !   Temp counter used to iterate through arrays
@@ -30,21 +31,56 @@
       integer, dimension (0:127) :: message
       integer, dimension (0:7, 0:7, 0:1) :: m
 
+!   Here are variables used for the hex extension of this assignment
+      character (len = 11) :: w
+      integer, dimension (0:19) :: hexword
+      integer :: hexlength
+
+#if 0
+      character (len = 11) :: w
+      integer, dimension (0:19) :: hexword
+      integer :: hexlength
+      call readWord(w)
+      if (len_trim(w) < 1 .or. len_trim(w) > 10) then
+         print *, 'Error: word must be between 1 and 10 chars. &
+         Terminating program.'
+         stop
+      end if
+
+      call word2hex(w, hexword, hexlength)
+
+      call printhex(hexword, hexlength)
+#endif
+
 !   Prompt the user for the key first
       print *, ' '
       print *, 'Enter your key (32 char):'
       read(*,'(32z1.1)') (kb(i),i=0,31)
 
-!   Prompt the user for the plaintext next
+!   Prompt the user for the plaintext word
       print *, ' '
-      print *, 'Enter plaintext (32 char):'
-      read(*,'(32z1.1)') (mb(i),i=0,31)
+      print *, 'Enter word:'
+      call readWord(w)
+
+!   Word length checking (1 - 10 chars)
+      if (len_trim(w) < 1 .or. len_trim(w) > 10) then
+         print *, 'Error: word must be between 1 and 10 chars.'
+         stop
+      end if
+
+!   Convert the user-inputted string to hex array
+      call word2hex(w, hexword, hexlength)
+
+!   Print the word in hex
+      print *, ' '
+      print *, 'Hexadecimal word'
+      call printhex(hexword, hexlength)
 
 !   Expand both the message (mb) and key (kb) as explained above
       call expand(message, mb, 32)
       call expand(key, kb, 32)
 
-#ifdef 0
+#ifdef DEBUG
 !   Print the resultant expanded binary key
       print 1000, (key(i), i = 0, 127)
 1000  format(' key '/16(1x, i1))
@@ -75,7 +111,7 @@
 !   by the first argument being 1.
       call lucifer(1, k, m)
 
-#ifdef 0
+#ifdef DEBUG
 !   Print the resultant plaintext again in binary array format
       print 1001, (message(i), i = 0, 127)
 #endif
@@ -98,11 +134,11 @@
       print '(32z1.1)', (mb(i), i = 0, 31)
       print *, ' '
 
-#ifdef 0
+#ifdef DEBUG
 1001 format('plain'/16(1x, i1))
 #endif
 
-      end program luc
+      end program luchex
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -195,7 +231,6 @@
 
 !           h and l were originally references to c(0) and c(1) as
 !           per the equivalence, but I removed those out of clarity.
-
             do kk = 0, 3
                l = l * 2 + m(7 - kk, jj, h1)
             end do
