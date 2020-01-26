@@ -2,6 +2,10 @@ GFLAGSX = -Wall -Wextra -pedantic -fimplicit-none -fbacktrace -Wsurprising -fche
 
 GFLAGS = -Wall -Wextra -pedantic -fimplicit-none -fbacktrace -Wsurprising -fcheck=mem -cpp
 
+TASK1 = luc.f95
+
+TASK2 = hex.f95 luchex.f95
+
 main:
-	gfortran $(GFLAGS) hex.f95 luchex.f95
+	gfortran $(GFLAGSX) $(TASK2)
 	./a.out

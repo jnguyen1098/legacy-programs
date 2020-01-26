@@ -1,11 +1,11 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                     !
+!                                Lucifer                              !
+!                                                                     !
+!                         Jason Nguyen (1013950)                      !
+!                                                                     !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       program luc
-!
-!   This program implements the 'Lucifer' cipher, the
-!   direct predecessor of the DES algorithm.
-!
-!   Jason Nguyen (1013950)
-!
       implicit none
 
 !   Temp counter used to iterate through arrays

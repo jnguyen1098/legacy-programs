@@ -44,14 +44,14 @@
 
 !   Prompt the user for the plaintext word
       print *, ' '
-      print *, 'Enter your word:'
-      call readWord(w)
-
-!   Word length checking (1 - 10 chars)
-      if (len_trim(w) < 1 .or. len_trim(w) > 10) then
-         print *, 'Error: word must be between 1 and 10 chars.'
-         stop
-      end if
+      do while (len_trim(w) < 1 .or. len_trim(w) > 10)
+         print *, 'Enter your word:'
+         call readWord(w)
+         if (len_trim(w) < 1 .or. len_trim(w) > 10) then
+            print *, 'Error: word must be between 1 and 10 chars.'
+            print *, ' '
+         end if
+      end do
 
 !   Convert the user-inputted string to hex array
       call word2hex(w, hexword, hexlength)
