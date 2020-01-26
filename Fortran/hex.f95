@@ -33,7 +33,7 @@
 !   l is the resultant length. Because we are going from native string
 !   to array of integers, we no longer have the luxury of strlen.
       character (len = 10), intent(in) :: w
-      integer, dimension(0:*), intent(out) :: h
+      integer, dimension(0:31), intent(out) :: h
       integer, intent(out) :: l
 
 !   i is used to iterate through the input, from 1 to len_trim(w),

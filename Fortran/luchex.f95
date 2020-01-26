@@ -27,14 +27,14 @@
 !   bytes, into a binary representation of 128 binary digits. The
 !   only difference here is that instead of the 1 x 128 array being
 !   mapped onto an 8 x 16 array, we are mapping it to 8 x 8 x 2
-      integer, dimension (0:31) :: mb
-      integer, dimension (0:127) :: message
-      integer, dimension (0:7, 0:7, 0:1) :: m
+      integer, dimension (0:31) :: mb = 0
+      integer, dimension (0:127) :: message = 0
+      integer, dimension (0:7, 0:7, 0:1) :: m = 0
 
 !   Here are variables used for the hex extension of this assignment
       character (len = 11) :: w
-      integer, dimension (0:19) :: hexword
-      integer :: hexlength
+      integer, dimension (0:31) :: hexword = 0
+      integer :: hexlength = 0
 
 !   Prompt the user for the key first
       print *, '~~~~~~~~~~User Input~~~~~~~~~~~'
