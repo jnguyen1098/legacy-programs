@@ -39,16 +39,27 @@
 !   so I should be able to refer to it as length 32 without issue
       integer :: hexlength = 0
 
+!   Error checking
+      integer :: readerror = 1
+
 !   Prompt the user for the key first
       print *, '~~~~~~~~~~User Input~~~~~~~~~~~'
-      print *, ' '
-      print *, 'Enter your key (32 char):'
-      read(*,'(32z1.1)') (kb(i),i=0,31)
+      do
+         print *, ' '
+         print *, 'Enter your key (0-9, A-F and a-f only):'
+         read(*, '(32z1.1)', iostat = readerror) (kb(i),i=0,31)
+
+         if (readerror == 0) then
+            exit
+         end if
+
+         print *, 'Invalid input. Please try again.'
+      end do
 
 !   Prompt the user for the plaintext word
       print *, ' '
       do while (len_trim(w) < 1 .or. len_trim(w) > 10)
-         print *, 'Enter your word:'
+         print *, 'Enter your word (alphabetic only):'
          call readWord(w)
          if (len_trim(w) < 1 .or. len_trim(w) > 10) then
             print *, 'Error: word must be between 1 and 10 chars.'

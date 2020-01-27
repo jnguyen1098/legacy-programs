@@ -30,15 +30,34 @@
       integer, dimension (0:127) :: message
       integer, dimension (0:7, 0:7, 0:1) :: m
 
+!   Error checking
+      integer :: readerror = 1
+
 !   Prompt the user for the key first
-      print *, ' '
-      print *, 'Enter your key (32 char):'
-      read(*,'(32z1.1)') (kb(i),i=0,31)
+      do
+         print *, ' '
+         print *, 'Enter your key (0-9, A-F and a-f only):'
+         read(*,'(32z1.1)', iostat = readerror) (kb(i),i=0,31)
+
+         if (readerror == 0) then
+            exit
+         end if
+
+         print *, 'Invalid input. Please try again.'
+      end do
 
 !   Prompt the user for the plaintext next
-      print *, ' '
-      print *, 'Enter plaintext (32 char):'
-      read(*,'(32z1.1)') (mb(i),i=0,31)
+      do
+         print *, ' '
+         print *, 'Enter plaintext (0-9, A-F and a-f only):'
+         read(*,'(32z1.1)', iostat = readerror) (mb(i),i=0,31)
+
+         if (readerror == 0) then
+            exit
+         end if
+
+         print *, 'Invalid input. Please try again.'
+      end do
 
 !   Expand both the message (mb) and key (kb) as explained above
       call expand(message, mb, 32)
