@@ -31,9 +31,12 @@
       integer, dimension (0:127) :: message = 0
       integer, dimension (0:7, 0:7, 0:1) :: m = 0
 
-!   Here are variables used for the hex extension of this assignment
+!   Here is the string used for the hex component
       character (len = 11) :: w
-      integer, dimension (0:31) :: hexword = 0
+
+!   I think this variable is useless, but I will create it anyway
+!   so I don't potentially use marks. I zero-initialize my mb array 
+!   so I should be able to refer to it as length 32 without issue
       integer :: hexlength = 0
 
 !   Prompt the user for the key first
@@ -54,16 +57,18 @@
       end do
 
 !   Convert the user-inputted string to hex array
-      call word2hex(w, hexword, hexlength)
+!   I am *re-using* the mb variable as we no longer use it for
+!   hard 32-char input like in luc.f95
+      call word2hex(w, mb, hexlength)
 
 !   Print the word in hex
       print *, ' '
       print *, 'Hexadecimal word'
-      call printhex(hexword, hexlength)
+      call printhex(mb, 32)
       print *, ' '
 
 !   Expand both the message (mb) and key (kb) as explained above
-      call expand(message, hexword, hexlength)
+      call expand(message, mb, 32)
       call expand(key, kb, 32)
 
 !   Reshape key and message from (1 x 128) to their respective
