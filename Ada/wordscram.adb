@@ -120,7 +120,7 @@ procedure Wordscram is
 
     -- Scramble a string / "word" in-place
     procedure scrambleWord(Str : in out String; Len : in Integer) is
-        Copy : String := Str(Str'first + 1 .. Str'first + Len - 2);
+        Copy : String := Str(Str'First + 1 .. Str'Last - 1);
         Rand : Integer;
     begin
 
@@ -146,8 +146,12 @@ procedure Wordscram is
     function isWord(Str : String) return Boolean is
     Ascii_Value : Integer;
     begin
-        -- Check for empty string
+        -- Check for weird cases
         if Str = "" then
+            return false;
+        end if;
+
+        if Str'Length = 0 then
             return false;
         end if;
 
@@ -182,6 +186,7 @@ procedure Wordscram is
     procedure Test_isWord(Str : String; Expected : Boolean);
     procedure Test_randomInt(A : Integer; B : Integer);
     procedure Test_scrambleWord(Str : String);
+    procedure Test_derangement(Str : String);
 
 -----------------------------------------------------------------------
 
@@ -225,6 +230,13 @@ procedure Wordscram is
         -- Scramble a copy of the word
         scrambleWord(Copy, Copy'Length);
 
+        -- Assert that words with length < 4 are untouched
+        if Str'Length < 4 then
+            Assert(Str = Copy, "scrambleWord(" & Str & ") failed" &
+                   " and returned " & Copy & ". Words less than" &
+                   " 4 characters must be untouched!");
+        end if;
+
         -- Assert that scrambleWord() creates an actual word
         Assert(isWord(Copy) = True, Copy & " is not a word!");
         
@@ -259,6 +271,43 @@ procedure Wordscram is
         Put_Line("    PASS: scrambleWord(" & Str & ")");
 
     end Test_scrambleWord;
+
+    -- Tests substring derangement. HELLO has a potential derangement
+    -- at ELL. The first and last character must remain, but all of the
+    -- characters in-between must be moved. Of course, sometimes they,
+    -- by complete chance, don't. Which is why I will run 1000 trials.
+    --
+    -- The goal is to find at least one derangement, which is where all
+    -- of the non-first non-last characters are out of order.
+    -- 
+    -- This test will run after all the Test_scrambleWord() trials so
+    -- that I know scrambleWord() is capable of creating anagrams.
+    procedure Test_derangement(Str : String) is
+    Copy : String := Str;
+    Found : Boolean := True;
+    begin
+        if Str'Length > 3 then
+            for trial in 1 .. 1000 loop
+                Found := True;
+                scrambleWord(Copy, Copy'Length);
+
+                for i in Copy'First + 1 .. Copy'Last - 1 loop
+                    if Copy(i) = Str(i) then
+                        Found := False;
+                    end if;
+                end loop;
+
+                if Found then
+                    exit;
+                end if;
+
+            end loop;
+            Assert(Found, "Could not force derangement on " &
+                   "scrambleWord(" & Str & "). Returned " & Copy);
+
+            Put_Line("    PASS: scrambleWord(" & Str & ")");
+        end if;
+    end Test_derangement;
 
     -- Testing variables
 
@@ -300,6 +349,27 @@ begin
         Test_isWord("adsf~~asdfasdf", false);
         Test_isWord("ABCDEFGHIJKL~MNOPQRSTUVWXYZ", false);
         Test_isWord("1234567890][';/.[p,p.][}{>{}>}{>{}", false);
+
+        for i in 32 .. 64 loop
+            Test_isWord(Character'Image(Character'Val(i))(2 .. 2), false);
+        end loop;
+
+        for i in 91 .. 96 loop
+            Test_isWord(Character'Image(Character'Val(i))(2 .. 2), false);
+        end loop;
+
+        for i in 123 .. 126 loop
+            Test_isWord(Character'Image(Character'Val(i))(2 .. 2), false);
+        end loop;
+    New_Line;
+
+    Put_Line("Testing isWord() for false with escape sequences...");
+    New_Line;
+        for i in 0 .. 31 loop
+            Test_isWord(ESC & Integer'Image(i), false);
+        end loop;
+
+        Test_isWord(ESC & Integer'Image(127), false);
     New_Line;
 
     Put_Line("Testing randomInt()...");
@@ -347,10 +417,22 @@ begin
                           "uvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi" &
                           "jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX" &
                           "YZabcdefABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFG");
+        New_Line;
+
+    Put_Line("Testing derangements...");
+    New_Line;
+        Test_derangement("ABCDEFGH");
+        Test_derangement("abcdefgh");
+        Test_derangement("IJKLMNOP");
+        Test_derangement("ijklmnop");
+        Test_derangement("QRSTUVWX");
+        Test_derangement("qrstuvwx");
+        Test_derangement("YZ");
+        Test_derangement("yz");
+    New_Line;
 
 
     -- Manual testing
-    New_Line;
     Put_Line(ESC & "[32m" & "Passed all automatic tests" & ESC &"[0m");
     Put_Line(ESC & "[32m" & "Starting manual tests!" & ESC & "[0m");
 

@@ -9,3 +9,6 @@ dirty:
 	gnatmake -Wall wordscram.adb
 	./wordscram
 	rm -rf wordscram.ali wordscram.o
+
+clean:
+	rm -rf wordscram.ali wordscram.o
