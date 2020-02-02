@@ -27,6 +27,7 @@ procedure Wordscram is
             if (Does_File_Exist(File_Name(File_Name'First .. Len))
                     = False) then
                 Put_Line("Could not open file! Re-try.");
+                New_Line;
             else exit;
             end if;
         end loop;
@@ -52,12 +53,30 @@ procedure Wordscram is
     Word_Count : Integer := 0;
             Fp : Ada.Text_IO.File_Type;
     begin
-        -- Attempt to open the file
+        -- Attempt to open the file for playback
+        Open(File => Fp,
+             Mode => In_File,
+             Name => File_Name);
+
+        -- Print every original line
+        Put_Line("                      O r i g i n a l      T e x t");
+        Put_Line("--------------------------------------------------" &
+                 "----------------------");
+        while not End_Of_File(Fp) loop
+            Put_Line(Get_Line(Fp));
+        end loop;
+        New_Line;
+        Close(Fp);
+
+        -- Attempt to open the file again, this time for processing
         Open(File => Fp,
              Mode => In_File,
              Name => File_Name);
 
         -- Process every line
+        Put_Line("                      T r a n s p o s e d  T e x t");
+        Put_Line("--------------------------------------------------" &
+                 "----------------------");
         while not End_Of_File(Fp) loop
         declare
              Left : Integer := 1;
@@ -71,7 +90,8 @@ procedure Wordscram is
                     Left := Left + 1;
                     Right := Right + 1;
                 else
-                    while Right <= Line'Length and then isWord(Line(Left .. Right)) loop
+                    while Right <= Line'Length and then
+                    isWord(Line(Left .. Right)) loop
                         Right := Right + 1;
                     end loop;
                     Right := Right - 1;
@@ -86,7 +106,7 @@ procedure Wordscram is
                 end if;
             end loop;
 
-            Put_Line("");
+            New_Line;
 
         end;
         end loop;
@@ -182,16 +202,18 @@ procedure Wordscram is
         for i in 1 .. 10000 loop
             Rand_Value := randomInt(A, B);
             Checks(Rand_Value) := 1;
-            Assert(Rand_Value >= A and Rand_Value < B,
-                    "randomInt(" & Integer'Image(A) & "," & Integer'Image(B) & ") failed!"
-                    & " Got " & Integer'Image(Rand_Value));
+            Assert(Rand_Value >= A and Rand_Value < B, "randomInt(" &
+                    Integer'Image(A) & "," & Integer'Image(B) &
+                    ") failed!" & " Got " & Integer'Image(Rand_Value));
         end loop;
         -- Assert function is surjective / "onto" range
         for i in A .. B - 1 loop
-            Assert(Checks(i) = 1, "Value " & Integer'Image(i) & " not found in range ["
-                    & Integer'Image(A) & ", " & Integer'Image(B) & ").");
+            Assert(Checks(i) = 1, "Value " & Integer'Image(i) &
+                   " not found in range [" & Integer'Image(A) & ", " &
+                    Integer'Image(B) & ").");
         end loop;
-        Put_Line("    PASS: randomInt(" & Integer'Image(A) & "," & Integer'Image(B) & ")");
+        Put_Line("    PASS: randomInt(" & Integer'Image(A) & "," &
+                 Integer'Image(B) & ")");
     end Test_randomInt;
 
     -- Tests the word scrambling of scrambleWord()
@@ -216,7 +238,7 @@ procedure Wordscram is
         Assert(Copy(Copy'Last) = Str(Str'Last),
                 "Last letters don't match: " & Copy & " != " & Str);
 
-        -- Confirm that the two words are anagrams by checking off letters
+        -- Confirm that the two words are anagrams by checking letters
         for i in Copy'First .. Copy'Last loop
             for j in Temp'First .. Temp'Last loop
                 if Copy(i) = Temp(j) then
@@ -225,10 +247,11 @@ procedure Wordscram is
             end loop;
         end loop;
 
-        -- Verify the guard character, the period '.'. Because we verify
+        -- Verify the guard character, the period. Because we verify
         -- that isWord() gives true, the period is free to use
         for i in Temp'First .. Temp'Last loop
-            Assert(Temp(i) = '.', Copy & " and " & Str & " are not anagrams!");
+            Assert(Temp(i) = '.', Copy & " and " & Str &
+                   " are not anagrams!");
         end loop;
 
         -- Test passed at this point
@@ -323,13 +346,14 @@ begin
                           "jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX" &
                           "YZabcdefABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFG");
     New_Line;
-
     Put_Line("All tests passed!");
+    New_Line;
     
-    --getFilename(File_Name, File_Name_Len);
-    --Put_Line(File_Name(1..File_Name_Len));
-    --Num_Words := processText(File_Name(1..File_Name_Len));
-    --Put_Line("Word count: " & Integer'Image(Num_Words));
+    getFilename(File_Name, File_Name_Len);
+    New_Line;
+    Num_Words := processText(File_Name(1..File_Name_Len));
+    New_Line;
+    Put_Line("Word count: " & Integer'Image(Num_Words));
 
 
     -- Main code
