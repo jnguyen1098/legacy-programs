@@ -58,42 +58,70 @@ procedure Wordscram is
              Name => File_Name);
 
         -- Process every line
-        loop
-            declare
-                -- Temp line variable
-                Line : String := Get_Line(Fp);
+        while not End_Of_File(Fp) loop
+        declare
+             Left : Integer := 1;
+            Right : Integer := 1;
+             Line : String := Get_Line(Fp);
+        begin
 
-                -- Temp index variables for isolating words
-                Left : Integer := 1;
-               Right : Integer := 2;
-            begin
-                Put_Line("Size is " & Integer'Image(Line'size));
-                for i in 1 .. Line'size loop
-                    Put_Line(Line(1 .. i));
-                end loop;
-                Word_Count := Word_Count + 1;
-            end;
+            while Left <= Line'Length and then Right <= Line'Length loop
+                if isWord(Line(Left .. Right)) = False then
+                    Put(Line(Left .. Right));
+                    Left := Left + 1;
+                    Right := Right + 1;
+                else
+                    while Right <= Line'Length and then isWord(Line(Left .. Right)) loop
+                        Right := Right + 1;
+                    end loop;
+                    Right := Right - 1;
+                    scrambleWord(Line(Left .. Right), Right - Left + 1);
+
+                    Word_Count := Word_Count + 1;
+
+                    Right := Right + 1;
+                    Left := Right;
+
+                end if;
+            end loop;
+
+            Put_Line("");
+
+        end;
         end loop;
 
         -- Close the file when we are done and return word count
         Close(Fp);
         return Word_Count;
-    exception
-        -- Close the file during errors, as well as return word count
-        when End_Error =>
-            if Is_Open(Fp) then
-                Close(Fp);
-            end if;
-            return Word_Count;
+
     end processText;
 
     -- Scramble a string / "word" in-place
     procedure scrambleWord(Str : in out String; Len : in Integer) is
-        
+        Copy : String := Str(Str'first + 1 .. Str'first + Len - 2);
+        Rand : Integer;
     begin
-        for i in 1 .. Len loop
-            Str(i) := 'A';
-        end loop;
+
+        if Len > 3 then
+            for i in 2 .. Len - 1 loop
+
+                Rand := randomInt(Copy'First, Copy'Last + 1);
+
+                for l in 1 .. 1000 loop
+                if Copy(Rand) = '.' then
+                    Rand := randomInt(Copy'First, Copy'Last + 1);
+                end if;
+                end loop;
+
+                Str(Str'first + i - 1) := Copy(Rand);
+                Copy(Rand) := '.';
+
+            end loop;
+
+        end if;
+
+        Put(Str);
+
     end scrambleWord;
 
     -- Check if a string is completely alphabetic
@@ -106,7 +134,7 @@ procedure Wordscram is
         end if;
 
         -- Check if each character is alpha
-        for i in Str'range loop
+        for i in 1 .. Str'Length loop
             Ascii_Value := Character'Pos(Str(Str'first + i - 1));
             if Ascii_Value < 65 or Ascii_Value > 122 then
                 return false;
