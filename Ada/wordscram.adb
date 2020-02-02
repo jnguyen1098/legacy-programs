@@ -8,16 +8,84 @@ procedure Wordscram is
 
 -------------------------- Main Subprograms ---------------------------
 
+    procedure getFilename(File_Name : out String; Len : out Integer);
+    function processText(File_Name : String) return Integer;
+    procedure scrambleWord(Str : in out String; Len : in Integer);
+    function randomInt(A : Integer; B : Integer) return Integer;
+    function isWord(Str : String) return Boolean;
+
+    function Does_File_Exist(Name : String) return Boolean;
+
+-----------------------------------------------------------------------
+
     -- Verifies a filename and returns it to main
-    procedure getFilename (File_Name : out String; Len : out Integer) is
+    procedure getFilename(File_Name : out String; Len : out Integer) is
     begin
-        Put("File name to open: ");
-        Get_Line(File_Name, Len);
-        
+        loop
+            Put("File name to open: ");
+            Get_Line(File_Name, Len);
+            if (Does_File_Exist(File_Name(File_Name'First .. Len))
+                    = False) then
+                Put_Line("Could not open file! Re-try.");
+            else exit;
+            end if;
+        end loop;
     end getFilename;
 
-    -- Processes the words within a file
+    -- Helper function to verify if file exists
+    function Does_File_Exist(Name : String) return Boolean is
+        Fp : Ada.Text_IO.File_Type;
+    begin
+        -- Asking for forgiveness . . . 
+        Open(Fp, In_File, Name);
+        Close(Fp);
+        return True;
 
+    exception
+        -- . . . rather than permission. :-)
+        when Name_Error =>
+            return False;
+    end Does_File_Exist;
+
+    -- Processes the words within a file
+    function processText(File_Name : String) return Integer is
+    Word_Count : Integer := 0;
+            Fp : Ada.Text_IO.File_Type;
+    begin
+        -- Attempt to open the file
+        Open(File => Fp,
+             Mode => In_File,
+             Name => File_Name);
+
+        -- Process every line
+        loop
+            declare
+                -- Temp line variable
+                Line : String := Get_Line(Fp);
+
+                -- Temp index variables for isolating words
+                Left : Integer := 1;
+               Right : Integer := 2;
+            begin
+                Put_Line("Size is " & Integer'Image(Line'size));
+                for i in 1 .. Line'size loop
+                    Put_Line(Line(1 .. i));
+                end loop;
+                Word_Count := Word_Count + 1;
+            end;
+        end loop;
+
+        -- Close the file when we are done and return word count
+        Close(Fp);
+        return Word_Count;
+    exception
+        -- Close the file during errors, as well as return word count
+        when End_Error =>
+            if Is_Open(Fp) then
+                Close(Fp);
+            end if;
+            return Word_Count;
+    end processText;
 
     -- Scramble a string / "word" in-place
     procedure scrambleWord(Str : in out String; Len : in Integer) is
@@ -65,6 +133,11 @@ procedure Wordscram is
 
 ------------------------- Testing Subprograms -------------------------
 
+    procedure Test_isWord(Str : String; Expected : Boolean);
+    procedure Test_randomInt(A : Integer; B : Integer);
+
+-----------------------------------------------------------------------
+
     -- Tests the return value of isWord()
     procedure Test_isWord(Str : String; Expected : Boolean) is
     begin
@@ -103,6 +176,7 @@ procedure Wordscram is
     -- Main variables
     File_Name_Len : Integer;
         File_Name : String(1..100);
+        Num_Words : Integer;
 
 -----------------------------------------------------------------------
 
@@ -155,7 +229,9 @@ begin
     Put_Line("All tests passed!");
     
     getFilename(File_Name, File_Name_Len);
-    Put(File_Name(1..File_Name_Len));
+    Put_Line(File_Name(1..File_Name_Len));
+    Num_Words := processText(File_Name(1..File_Name_Len));
+    Put_Line("Word count: " & Integer'Image(Num_Words));
 
     -- Main code
 
