@@ -2,6 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Assertions; use Ada.Assertions;
 with Ada.Numerics.Discrete_Random;
 with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
+with Ada.Characters.Handling; use Ada.Characters.Handling;
 --with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 --with Ada.Strings.Unbounded.Text_IO; use Ada.Strings.Unbounded.Text_IO;
 
@@ -123,6 +124,9 @@ procedure Wordscram is
         Copy : String := Str(Str'First + 1 .. Str'Last - 1);
         Rand : Integer;
     begin
+        -- TODO: consider fixing the inefficient randomness alg
+        -- TODO: see if I can get rid of that Len parameter
+        -- TODO: add more comments
 
         if Len > 3 then
             for i in 2 .. Len - 1 loop
@@ -144,24 +148,16 @@ procedure Wordscram is
 
     -- Check if a string is completely alphabetic
     function isWord(Str : String) return Boolean is
-    Ascii_Value : Integer;
     begin
-        -- Check for weird cases
+        -- Check for empty string
         if Str = "" then
-            return false;
+            return False;
         end if;
 
-        if Str'Length = 0 then
-            return false;
-        end if;
-
-        -- Check if each character is alpha
-        for i in 1 .. Str'Length loop
-            Ascii_Value := Character'Pos(Str(Str'first + i - 1));
-            if Ascii_Value < 65 or Ascii_Value > 122 then
-                return false;
-            elsif Ascii_Value > 90 and Ascii_Value < 97 then
-                return false;
+        -- Check if each character is alphabetic
+        for i in Str'First .. Str'Last loop
+            if not Is_Letter(Str(i)) then
+                return False;
             end if;
         end loop;
 
@@ -245,11 +241,13 @@ procedure Wordscram is
 
         -- Assert that the first letters match
         Assert(Copy(Copy'First) = Str(Str'First), 
-                "First letters don't match: " & Copy & " != " & Str);
+                "scrambleWord(" & Str & ") => " & Copy &
+                " failed. First letters don't match!");
 
         -- Assert that the last letters match
         Assert(Copy(Copy'Last) = Str(Str'Last),
-                "Last letters don't match: " & Copy & " != " & Str);
+                "scrambleWord(" & Str & ") => " & Copy &
+                " failed. Last letters don't match!");
 
         -- Confirm that the two words are anagrams by checking letters
         for i in Copy'First .. Copy'Last loop
@@ -333,6 +331,14 @@ begin
         Test_isWord("ASDFJSADFJSADKFJAG", true);
         Test_isWord("ABCDEFGHIJKLMNOPQRSTUVWXYZ", true);
         Test_isWord("abcdefghijklmnopqrstuvwxys", true);
+        
+        for i in 65 .. 90 loop
+            Test_isWord(Character'Image(Character'Val(i))(2 .. 2), true);
+        end loop;
+
+        for i in 97 .. 122 loop
+            Test_isWord(Character'Image(Character'Val(i))(2 .. 2), true);
+        end loop;
     New_Line;
 
     Put_Line("Testing isWord() for false...");
@@ -490,11 +496,11 @@ begin
 
     -- Main code
 
-    getFilename(File_Name, File_Name_Len);
-    New_Line;
-    Num_Words := processText(File_Name(1..File_Name_Len));
-    New_Line;
-    Put_Line("Word count: " & Integer'Image(Num_Words));
+    --getFilename(File_Name, File_Name_Len);
+    --New_Line;
+    --Num_Words := processText(File_Name(1..File_Name_Len));
+    --New_Line;
+    --Put_Line("Word count: " & Integer'Image(Num_Words));
 
 end Wordscram;
 
