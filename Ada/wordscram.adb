@@ -76,6 +76,7 @@ procedure Wordscram is
                     end loop;
                     Right := Right - 1;
                     scrambleWord(Line(Left .. Right), Right - Left + 1);
+                    Put(Line(Left .. Right));
 
                     Word_Count := Word_Count + 1;
 
@@ -107,20 +108,16 @@ procedure Wordscram is
 
                 Rand := randomInt(Copy'First, Copy'Last + 1);
 
-                for l in 1 .. 1000 loop
-                if Copy(Rand) = '.' then
+                loop
                     Rand := randomInt(Copy'First, Copy'Last + 1);
-                end if;
+                    exit when Copy(Rand) /= '.';
                 end loop;
 
-                Str(Str'first + i - 1) := Copy(Rand);
+                Str(Str'First + i - 1) := Copy(Rand);
                 Copy(Rand) := '.';
 
             end loop;
-
         end if;
-
-        Put(Str);
 
     end scrambleWord;
 
@@ -163,6 +160,7 @@ procedure Wordscram is
 
     procedure Test_isWord(Str : String; Expected : Boolean);
     procedure Test_randomInt(A : Integer; B : Integer);
+    procedure Test_scrambleWord(Str : String);
 
 -----------------------------------------------------------------------
 
@@ -197,7 +195,46 @@ procedure Wordscram is
     end Test_randomInt;
 
     -- Tests the word scrambling of scrambleWord()
-    
+    procedure Test_scrambleWord(Str : String) is
+    Copy : String := Str;
+    Temp : String := Str;
+    begin
+        -- Scramble a copy of the word
+        scrambleWord(Copy, Copy'Length);
+
+        -- Assert that scrambleWord() creates an actual word
+        Assert(isWord(Copy) = True, Copy & " is not a word!");
+        
+        -- Assert the two strings are the same length
+        Assert(Copy'Length = Str'Length, Copy & " != " & Str);
+
+        -- Assert that the first letters match
+        Assert(Copy(Copy'First) = Str(Str'First), 
+                "First letters don't match: " & Copy & " != " & Str);
+
+        -- Assert that the last letters match
+        Assert(Copy(Copy'Last) = Str(Str'Last),
+                "Last letters don't match: " & Copy & " != " & Str);
+
+        -- Confirm that the two words are anagrams by checking off letters
+        for i in Copy'First .. Copy'Last loop
+            for j in Temp'First .. Temp'Last loop
+                if Copy(i) = Temp(j) then
+                    Temp(j) := '.';
+                end if;
+            end loop;
+        end loop;
+
+        -- Verify the guard character, the period '.'. Because we verify
+        -- that isWord() gives true, the period is free to use
+        for i in Temp'First .. Temp'Last loop
+            Assert(Temp(i) = '.', Copy & " and " & Str & " are not anagrams!");
+        end loop;
+
+        -- Test passed at this point
+        Put_Line("    PASS: scrambleWord(" & Str & ")");
+
+    end Test_scrambleWord;
 
     -- Testing variables
 
@@ -219,9 +256,9 @@ begin
         Test_isWord("A", true);
         Test_isWord("Z", true);
         Test_isWord("AZ", true);
-        Test_isword("ASDFJSADFJSADKFJAG", true);
-        Test_isword("ABCDEFGHIJKLMNOPQRSTUVWXYZ", true);
-        Test_isword("abcdefghijklmnopqrstuvwxys", true);
+        Test_isWord("ASDFJSADFJSADKFJAG", true);
+        Test_isWord("ABCDEFGHIJKLMNOPQRSTUVWXYZ", true);
+        Test_isWord("abcdefghijklmnopqrstuvwxys", true);
     New_Line;
 
     Put_Line("Testing isWord() for false...");
@@ -236,6 +273,8 @@ begin
         Test_isWord("hsadfjasdf[aksdjfaskdf", false);
         Test_isWord("sakdjfl`aksdjf", false);
         Test_isWord("adsf~~asdfasdf", false);
+        Test_isWord("ABCDEFGHIJKL~MNOPQRSTUVWXYZ", false);
+        Test_isWord("1234567890][';/.[p,p.][}{>{}>}{>{}", false);
     New_Line;
 
     Put_Line("Testing randomInt()...");
@@ -254,12 +293,44 @@ begin
         Test_randomInt(1000, 1001);
     New_Line;
 
+    Put_Line("Testing scrambleWord()...");
+    New_Line;
+        Test_scrambleWord("a");
+        Test_scrambleWord("z");
+        Test_scrambleWord("ad");
+        Test_scrambleWord("hel");
+        Test_scrambleWord("HASfdhasFDDFhasdf");
+        Test_scrambleWord("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        Test_scrambleWord("abcdefghijklmnopqrstuvwxyz");
+        Test_scrambleWord("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        Test_scrambleWord("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+        Test_scrambleWord("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+        Test_scrambleWord("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+        Test_scrambleWord("IJUSTLOSTTHEGAMEEEEEEEEEEEEEEEEEEEEEEEEEE");
+        Test_scrambleWord("ABCDEFGHIJKLMNOPQRSTUVWXYZ" &
+                          "abcdefghijklmnopqrstuvwxyz");
+        Test_scrambleWord("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno" &
+                          "pqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcd" &
+                          "efghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS" &
+                          "TUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGH" &
+                          "IJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvw" &
+                          "xyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl" &
+                          "mnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZa" &
+                          "bcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP" &
+                          "QRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDE" &
+                          "FGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrst" &
+                          "uvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi" &
+                          "jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX" &
+                          "YZabcdefABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFG");
+    New_Line;
+
     Put_Line("All tests passed!");
     
-    getFilename(File_Name, File_Name_Len);
-    Put_Line(File_Name(1..File_Name_Len));
-    Num_Words := processText(File_Name(1..File_Name_Len));
-    Put_Line("Word count: " & Integer'Image(Num_Words));
+    --getFilename(File_Name, File_Name_Len);
+    --Put_Line(File_Name(1..File_Name_Len));
+    --Num_Words := processText(File_Name(1..File_Name_Len));
+    --Put_Line("Word count: " & Integer'Image(Num_Words));
+
 
     -- Main code
 
