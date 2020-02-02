@@ -1,6 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Assertions; use Ada.Assertions;
 with Ada.Numerics.Discrete_Random;
+with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
 --with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 --with Ada.Strings.Unbounded.Text_IO; use Ada.Strings.Unbounded.Text_IO;
 
@@ -269,8 +270,9 @@ procedure Wordscram is
 -----------------------------------------------------------------------
 
 begin
-
     -- Test harness
+    Put_Line(ESC & "[32m" & "Starting automatic tests!" & ESC & "[0m");
+
     Put_Line("Testing isWord() for true...");
     New_Line;
         Test_isWord("a", true);
@@ -345,19 +347,72 @@ begin
                           "uvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi" &
                           "jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX" &
                           "YZabcdefABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFG");
+
+
+    -- Manual testing
     New_Line;
-    Put_Line("All tests passed!");
+    Put_Line(ESC & "[32m" & "Passed all automatic tests" & ESC &"[0m");
+    Put_Line(ESC & "[32m" & "Starting manual tests!" & ESC & "[0m");
+
     New_Line;
-    
+    Put_Line("Testing 1000 most common English words...");
+    Put_Line("You should be able to recognize these");
+    New_Line;
+    Num_Words := processText("test/test.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing punctuation nightmare");
+    Put_Line("Punctuation should be intact; words scrambled");
+    New_Line;
+    Num_Words := processText("test/punctuation.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing 3-letter words");
+    Put_Line("There should be NO change");
+    New_Line;
+    Num_Words := processText("test/3letter.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing 2-letter words");
+    Put_Line("There should be NO change");
+    New_Line;
+    Num_Words := processText("test/2letter.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing 1-letter words");
+    Put_Line("There should be NO change");
+    New_Line;
+    Num_Words := processText("test/1letter.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing professor's sample file");
+    New_Line;
+    Num_Words := processText("test/sample.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line(ESC & "[32m" & "All automatic tests passed!" & ESC & "[0m");
+    Put_Line("Now, scroll up and manually examine your sample outputs.");
+    New_Line;
+
+    -- Main code
+
     getFilename(File_Name, File_Name_Len);
     New_Line;
     Num_Words := processText(File_Name(1..File_Name_Len));
     New_Line;
     Put_Line("Word count: " & Integer'Image(Num_Words));
-
-
-    -- Main code
-
 
 end Wordscram;
 
