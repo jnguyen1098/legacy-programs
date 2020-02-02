@@ -75,7 +75,7 @@
 !   Print the word in hex
       print *, ' '
       print *, 'Hexadecimal word'
-      call printhex(mb, 32)
+      call printhex(mb, hexlength)
       print *, ' '
 
 !   Expand both the message (mb) and key (kb) as explained above
