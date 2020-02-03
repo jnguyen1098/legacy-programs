@@ -3,8 +3,7 @@ with Ada.Assertions; use Ada.Assertions;
 with Ada.Numerics.Discrete_Random;
 with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
---with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
---with Ada.Strings.Unbounded.Text_IO; use Ada.Strings.Unbounded.Text_IO;
+with Ada.Calendar; use Ada.Calendar;
 
 procedure Wordscram is
 
@@ -55,7 +54,7 @@ procedure Wordscram is
     Word_Count : Integer := 0;
             Fp : Ada.Text_IO.File_Type;
     begin
-        -- Attempt to open the file for playback
+        -- Open the file for playback
         Open(File => Fp,
              Mode => In_File,
              Name => File_Name);
@@ -86,6 +85,7 @@ procedure Wordscram is
              Line : String := Get_Line(Fp);
         begin
 
+            -- TODO: Comments
             while Left <= Line'Length and then Right <= Line'Length loop
                 if isWord(Line(Left .. Right)) = False then
                     Put(Line(Left .. Right));
@@ -124,23 +124,19 @@ procedure Wordscram is
         Copy : String := Str(Str'First + 1 .. Str'Last - 1);
         Rand : Integer;
     begin
-        -- TODO: consider fixing the inefficient randomness alg
-        -- TODO: see if I can get rid of that Len parameter
-        -- TODO: add more comments
-
+        -- Only words 4 char. or greater are eligible
         if Len > 3 then
+            -- Iterate over the middle characters
             for i in 2 .. Len - 1 loop
-
-                Rand := randomInt(Copy'First, Copy'Last + 1);
-
+                -- Keep looping until we get a unique letter
                 loop
                     Rand := randomInt(Copy'First, Copy'Last + 1);
                     exit when Copy(Rand) /= '.';
                 end loop;
-
+                -- Copy the character over
                 Str(Str'First + i - 1) := Copy(Rand);
+                -- Mark the original character spot as "used"
                 Copy(Rand) := '.';
-
             end loop;
         end if;
 
@@ -179,21 +175,12 @@ procedure Wordscram is
 
 ------------------------- Testing Subprograms -------------------------
 
-    procedure Test_isWord(Str : String; Expected : Boolean);
     procedure Test_randomInt(A : Integer; B : Integer);
+    procedure Test_isWord(Str : String; Expected : Boolean);
     procedure Test_scrambleWord(Str : String);
     procedure Test_derangement(Str : String);
 
 -----------------------------------------------------------------------
-
-    -- Tests the return value of isWord()
-    procedure Test_isWord(Str : String; Expected : Boolean) is
-    begin
-        -- Assert word status
-        Assert(isWord(Str) = Expected, "isWord(" & str & ") failed! " &
-                "Expected " & Boolean'Image(Expected));
-        Put_Line("    PASS: isWord(" & str & ")");
-    end test_isWord;
 
     -- Tests the return value of randomInt()
     procedure Test_randomInt(A : Integer; B : Integer) is
@@ -217,6 +204,15 @@ procedure Wordscram is
         Put_Line("    PASS: randomInt(" & Integer'Image(A) & "," &
                  Integer'Image(B) & ")");
     end Test_randomInt;
+
+    -- Tests the return value of isWord()
+    procedure Test_isWord(Str : String; Expected : Boolean) is
+    begin
+        -- Assert word status
+        Assert(isWord(Str) = Expected, "isWord(" & str & ") failed! " &
+                "Expected " & Boolean'Image(Expected));
+        Put_Line("    PASS: isWord(" & str & ")");
+    end test_isWord;
 
     -- Tests the word scrambling of scrambleWord()
     procedure Test_scrambleWord(Str : String) is
@@ -307,12 +303,13 @@ procedure Wordscram is
         end if;
     end Test_derangement;
 
-    -- Testing variables
-
     -- Main variables
     File_Name_Len : Integer;
         File_Name : String(1..100);
         Num_Words : Integer;
+
+    Start_Time, End_Time : Time;
+           Millis : Duration;
 
 -----------------------------------------------------------------------
 
@@ -320,6 +317,26 @@ begin
     -- Test harness
     Put_Line(ESC & "[32m" & "Starting automatic tests!" & ESC & "[0m");
 
+    Start_Time := Clock;
+
+    -- randomInt() range test
+    Put_Line("Testing randomInt()...");
+    New_Line;
+        Test_randomInt(1, 5);
+        Test_randomInt(10, 500);
+        Test_randomInt(-10, 5);
+        Test_randomInt(-10, 0);
+        Test_randomInt(0, 50);
+        Test_randomInt(-100, 100);
+        Test_randomInt(-1, 0);
+        Test_randomInt(1, 2);
+        Test_randomInt(2, 3);
+        Test_randomInt(10, 11);
+        Test_randomInt(100, 101);
+        Test_randomInt(1000, 1001);
+    New_Line;
+
+    -- isWord() true test
     Put_Line("Testing isWord() for true...");
     New_Line;
         Test_isWord("a", true);
@@ -341,6 +358,7 @@ begin
         end loop;
     New_Line;
 
+    -- isWord() false test
     Put_Line("Testing isWord() for false...");
     New_Line;
         Test_isWord("", false);
@@ -369,6 +387,7 @@ begin
         end loop;
     New_Line;
 
+    -- isWord() escape sequence test
     Put_Line("Testing isWord() for false with escape sequences...");
     New_Line;
         for i in 0 .. 31 loop
@@ -378,22 +397,7 @@ begin
         Test_isWord(ESC & Integer'Image(127), false);
     New_Line;
 
-    Put_Line("Testing randomInt()...");
-    New_Line;
-        Test_randomInt(1, 5);
-        Test_randomInt(10, 500);
-        Test_randomInt(-10, 5);
-        Test_randomInt(-10, 0);
-        Test_randomInt(0, 50);
-        Test_randomInt(-100, 100);
-        Test_randomInt(-1, 0);
-        Test_randomInt(1, 2);
-        Test_randomInt(2, 3);
-        Test_randomInt(10, 11);
-        Test_randomInt(100, 101);
-        Test_randomInt(1000, 1001);
-    New_Line;
-
+    -- scrambleWord() anagram test
     Put_Line("Testing scrambleWord()...");
     New_Line;
         Test_scrambleWord("a");
@@ -425,6 +429,7 @@ begin
                           "YZabcdefABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFG");
         New_Line;
 
+    -- scrambleWord() derangement test
     Put_Line("Testing derangements...");
     New_Line;
         Test_derangement("ABCDEFGH");
@@ -438,10 +443,10 @@ begin
     New_Line;
 
 
-    -- Manual testing
     Put_Line(ESC & "[32m" & "Passed all automatic tests" & ESC &"[0m");
     Put_Line(ESC & "[32m" & "Starting manual tests!" & ESC & "[0m");
 
+    -- processTest() manual analysis
     New_Line;
     Put_Line("Testing 1000 most common English words...");
     Put_Line("You should be able to recognize these");
@@ -490,9 +495,21 @@ begin
     Put_Line("Word Count: " & Integer'Image(Num_Words));
 
     New_Line;
+    Put_Line("Arthur's behemoth");
+    New_Line;
+    Num_Words := processText("test/amurica.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    End_Time := Clock;
+    Millis := (End_Time - Start_Time) * 1000;
+
+    New_Line;
     Put_Line(ESC & "[32m" & "All automatic tests passed!" & ESC & "[0m");
     Put_Line("Now, scroll up and manually examine your sample outputs.");
     New_Line;
+
+    Put_Line(ESC & "[32m" & "Runtime: " & Duration'Image(Millis) & ESC & "[0m");
 
     -- Main code
 
