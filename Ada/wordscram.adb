@@ -4,6 +4,7 @@ with Ada.Numerics.Discrete_Random;
 with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Calendar; use Ada.Calendar;
+with Ada.Directories; use Ada.Directories;
 
 procedure Wordscram is
 
@@ -15,40 +16,29 @@ procedure Wordscram is
     function randomInt(A : Integer; B : Integer) return Integer;
     function isWord(Str : String) return Boolean;
 
-    function Does_File_Exist(Name : String) return Boolean;
-
 -----------------------------------------------------------------------
 
     -- Verifies a filename and returns it to main
-    -- TODO: use exists() instead of Does_File_Exist()
     procedure getFilename(File_Name : out String; Len : out Integer) is
     begin
         loop
+            -- Prompt user for filename
             Put("File name to open: ");
             Get_Line(File_Name, Len);
-            if (Does_File_Exist(File_Name(File_Name'First .. Len))
-                    = False) then
+
+            -- Filename testing. Assumed to ask again if loop doesn't break
+            if (File_Name(File_Name'First .. Len) = "" or else
+                File_Name(File_Name'First .. File_Name'First) = "."  or else
+                File_Name(File_Name'First .. File_Name'First) = "/" or else
+                exists(File_Name(File_Name'First .. Len)) = False) then
                 Put_Line("Could not open file! Re-try.");
                 New_Line;
+
+            -- Loop will break and function will exit assuming all tests pass
             else exit;
             end if;
         end loop;
     end getFilename;
-
-    -- Helper function to verify if file exists
-    function Does_File_Exist(Name : String) return Boolean is
-        Fp : Ada.Text_IO.File_Type;
-    begin
-        -- Asking for forgiveness . . . 
-        Open(Fp, In_File, Name);
-        Close(Fp);
-        return True;
-
-    exception
-        -- . . . rather than permission. :-)
-        when Name_Error =>
-            return False;
-    end Does_File_Exist;
 
     -- Processes the words within a file
     function processText(File_Name : String) return Integer is
@@ -75,43 +65,85 @@ procedure Wordscram is
              Mode => In_File,
              Name => File_Name);
 
-        -- Process every line
+        -- Process file by iterating over every line
         Put_Line("                      T r a n s p o s e d  T e x t");
         Put_Line("--------------------------------------------------" &
                  "----------------------");
+
+        -- Like above, we iterate over the file
         while not End_Of_File(Fp) loop
+
         declare
+            -- Left and Right represent slice/substring indices for parsing
+            -- Line is the fixed string holding the line. Because it is within
+            -- block scope with the loop, we do not have to use unbounded
+            -- string. This is because we re-create it every loop iteration.
              Left : Integer := 1;
             Right : Integer := 1;
              Line : String := Get_Line(Fp);
-        begin
 
-            -- TODO: Comments
+        begin
+            -- Parsing algorithm that aims to 'greedily' select the largest
+            -- word using Left and Right to index potential substrings, and
+            -- then moving to the next potential candidate.
+
+            -- This algorithm will backtrack upon discovering a non-alpha
+            -- character and use the backtracked 'word' as the scramble target.
+            -- Otherwise, it will just print out, one-by-one, as many non-
+            -- alpha characters as possible before returning to the greedy
+            -- word building algorithm as mentioned earlier.
+
+            -- This algorithm, as shown in this while loop, will only run for
+            -- the length of the current line. This is for bounds-checking.
             while Left <= Line'Length and then Right <= Line'Length loop
+
+                -- If current substring is a word...
                 if isWord(Line(Left .. Right)) then
+
+                    -- ...then greedily grow it until it is no longer a word.
                     while Right <= Line'Length and then
                     isWord(Line(Left .. Right)) loop
                         Right := Right + 1;
                     end loop;
+
+                    -- Upon finding a non-alpha character, we backtrack 1
                     Right := Right - 1;
+
+                    -- We know that this backtracked word is the largest
+                    -- possible substring that satisfies isWord(), so we go on
+                    -- to scramble it in-place and then print it.
                     scrambleWord(Line(Left .. Right));
                     Put(Line(Left .. Right));
 
+                    -- In doing so, we increment the word count.
                     Word_Count := Word_Count + 1;
 
+                    -- Then, we set both Left and Right indices into the first
+                    -- character following the word we just scrambled.
                     Right := Right + 1;
                     Left := Right;
+
+                -- Otherwise, if the current substring is NOT a word...
                 else
+                    
+                    -- ...we don't want to do anything else but print it.
                     Put(Line(Left .. Right));
+
+                    -- In fact, we print AS MANY non-alphabetic characters as
+                    -- possible. As long as there are more, it will always
+                    -- fall back to this else statement.
                     Left := Left + 1;
                     Right := Right + 1;
+
                 end if;
-            end loop;
 
-            New_Line;
+            end loop; -- We are finished parsing the file
 
-        end;
-        end loop;
+            New_Line; -- Putting a new line for cleanliness
+
+        end; -- End loop scope
+
+        end loop; -- End the actual loop
 
         -- Close the file when we are done and return word count
         Close(Fp);
@@ -305,7 +337,7 @@ procedure Wordscram is
 
     -- Main variables
     File_Name_Len : Integer;
-        File_Name : String(1..100);
+        File_Name : String(1..5000);
         Num_Words : Integer;
 
     Start_Time, End_Time : Time;
@@ -523,9 +555,16 @@ begin
     Put_Line("Word Count: " & Integer'Image(Num_Words));
 
     New_Line;
+    Put_Line("Testing quotations.txt");
+    New_Line;
+    Num_Words := processText("test/quotations.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
     Put_Line("Arthur's behemoth");
     New_Line;
-    Num_Words := processText("test/amurica.txt");
+    -- Num_Words := processText("test/amurica.txt");
     New_Line;
     Put_Line("Word Count: " & Integer'Image(Num_Words));
 
