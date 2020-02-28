@@ -11,7 +11,7 @@ procedure Wordscram is
 
     procedure getFilename(File_Name : out String; Len : out Integer);
     function processText(File_Name : String) return Integer;
-    procedure scrambleWord(Str : in out String; Len : in Integer);
+    procedure scrambleWord(Str : in out String);
     function randomInt(A : Integer; B : Integer) return Integer;
     function isWord(Str : String) return Boolean;
 
@@ -20,6 +20,7 @@ procedure Wordscram is
 -----------------------------------------------------------------------
 
     -- Verifies a filename and returns it to main
+    -- TODO: use exists() instead of Does_File_Exist()
     procedure getFilename(File_Name : out String; Len : out Integer) is
     begin
         loop
@@ -87,24 +88,23 @@ procedure Wordscram is
 
             -- TODO: Comments
             while Left <= Line'Length and then Right <= Line'Length loop
-                if isWord(Line(Left .. Right)) = False then
-                    Put(Line(Left .. Right));
-                    Left := Left + 1;
-                    Right := Right + 1;
-                else
+                if isWord(Line(Left .. Right)) then
                     while Right <= Line'Length and then
                     isWord(Line(Left .. Right)) loop
                         Right := Right + 1;
                     end loop;
                     Right := Right - 1;
-                    scrambleWord(Line(Left .. Right), Right - Left + 1);
+                    scrambleWord(Line(Left .. Right));
                     Put(Line(Left .. Right));
 
                     Word_Count := Word_Count + 1;
 
                     Right := Right + 1;
                     Left := Right;
-
+                else
+                    Put(Line(Left .. Right));
+                    Left := Left + 1;
+                    Right := Right + 1;
                 end if;
             end loop;
 
@@ -120,14 +120,14 @@ procedure Wordscram is
     end processText;
 
     -- Scramble a string / "word" in-place
-    procedure scrambleWord(Str : in out String; Len : in Integer) is
+    procedure scrambleWord(Str : in out String) is
         Copy : String := Str(Str'First + 1 .. Str'Last - 1);
         Rand : Integer;
     begin
         -- Only words 4 char. or greater are eligible
-        if Len > 3 then
+        if Str'Length > 3 then
             -- Iterate over the middle characters
-            for i in 2 .. Len - 1 loop
+            for i in 2 .. Str'Length - 1 loop
                 -- Keep looping until we get a unique letter
                 loop
                     Rand := randomInt(Copy'First, Copy'Last + 1);
@@ -220,7 +220,7 @@ procedure Wordscram is
     Temp : String := Str;
     begin
         -- Scramble a copy of the word
-        scrambleWord(Copy, Copy'Length);
+        scrambleWord(Copy);
 
         -- Assert that words with length < 4 are untouched
         if Str'Length < 4 then
@@ -283,7 +283,7 @@ procedure Wordscram is
         if Str'Length > 3 then
             for trial in 1 .. 1000 loop
                 Found := True;
-                scrambleWord(Copy, Copy'Length);
+                scrambleWord(Copy);
 
                 for i in Copy'First + 1 .. Copy'Last - 1 loop
                     if Copy(i) = Str(i) then
@@ -488,9 +488,37 @@ begin
     Put_Line("Word Count: " & Integer'Image(Num_Words));
 
     New_Line;
-    Put_Line("Testing professor's sample file");
+    Put_Line("Testing d2.txt");
     New_Line;
-    Num_Words := processText("test/sample.txt");
+    Num_Words := processText("test/d2.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing dijkstra.txt");
+    New_Line;
+    Num_Words := processText("test/dijkstra.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing middleE.txt");
+    New_Line;
+    Num_Words := processText("test/middleE.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing z.txt");
+    New_Line;
+    Num_Words := processText("test/z.txt");
+    New_Line;
+    Put_Line("Word Count: " & Integer'Image(Num_Words));
+
+    New_Line;
+    Put_Line("Testing empire.txt");
+    New_Line;
+    Num_Words := processText("test/empire.txt");
     New_Line;
     Put_Line("Word Count: " & Integer'Image(Num_Words));
 
@@ -513,11 +541,11 @@ begin
 
     -- Main code
 
-    --getFilename(File_Name, File_Name_Len);
-    --New_Line;
-    --Num_Words := processText(File_Name(1..File_Name_Len));
-    --New_Line;
-    --Put_Line("Word count: " & Integer'Image(Num_Words));
+    getFilename(File_Name, File_Name_Len);
+    New_Line;
+    Num_Words := processText(File_Name(1..File_Name_Len));
+    New_Line;
+    Put_Line("Word count: " & Integer'Image(Num_Words));
 
 end Wordscram;
 
