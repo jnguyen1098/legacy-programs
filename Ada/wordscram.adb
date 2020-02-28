@@ -21,7 +21,7 @@ procedure Wordscram is
     -- Verifies a filename and returns it to main
     procedure getFilename(File_Name : out String; Len : out Integer) is
     begin
-        loop
+        File_Name_Check: loop
             -- Prompt user for filename
             Put("File name to open: ");
             Get_Line(File_Name, Len);
@@ -35,9 +35,9 @@ procedure Wordscram is
                 New_Line;
 
             -- Loop will break and function will exit assuming all tests pass
-            else exit;
+            else exit File_Name_Check;
             end if;
-        end loop;
+        end loop File_Name_Check;
     end getFilename;
 
     -- Processes the words within a file
@@ -153,21 +153,24 @@ procedure Wordscram is
 
     -- Scramble a string / "word" in-place
     procedure scrambleWord(Str : in out String) is
+        -- Copies the string not including first/last char.
         Copy : String := Str(Str'First + 1 .. Str'Last - 1);
         Rand : Integer;
     begin
-        -- Only words 4 char. or greater are eligible
+        -- Only words 4 char. or greater will be scrambled
         if Str'Length > 3 then
             -- Iterate over the middle characters
             for i in 2 .. Str'Length - 1 loop
                 -- Keep looping until we get a unique letter
                 loop
-                    Rand := randomInt(Copy'First, Copy'Last + 1);
+                    Rand := randomInt(A => Copy'First, B => Copy'Last + 1);
                     exit when Copy(Rand) /= '.';
                 end loop;
-                -- Copy the character over
+                -- Copy this character over to the scrambled word
                 Str(Str'First + i - 1) := Copy(Rand);
-                -- Mark the original character spot as "used"
+                -- Mark the original character spot as "used".
+                -- This method only works because only true words
+                -- are passed to scrambleWord().
                 Copy(Rand) := '.';
             end loop;
         end if;
