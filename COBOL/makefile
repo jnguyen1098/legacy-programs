@@ -1,4 +1,4 @@
 main:
-	cobc -x -free -Wall main.cob
-	./main
-	rm -rf main
+	cobc -x -free -Wall sqrt.cob
+	./sqrt
+	rm -rf sqrt
