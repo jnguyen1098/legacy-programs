@@ -1,90 +1,106 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. SQRT.
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-CONTROL.
-    SELECT INPUT-FILE ASSIGN TO "sqrt.dat"
-    ORGANIZATION IS LINE SEQUENTIAL.
-    SELECT STANDARD-OUTPUT ASSIGN TO DISPLAY.
-DATA DIVISION.
-FILE SECTION.
-FD INPUT-FILE.
-    01 STANDARD-INPUT PICTURE X(80).
-FD STANDARD-OUTPUT.
-    01 OUT-LINE  PICTURE X(80).
-WORKING-STORAGE SECTION.
-77 DIFF PICTURE V9(5).
-77 Z    PICTURE 9(11)V9(6).
-77 K    PICTURE S9999.
-77 X    PICTURE 9(11)V9(6).
-77 Y    PICTURE 9(11)V9(6).
-77 TEMP PICTURE 9(11)V9(6).
-01 IN-CARD.
-   02 IN-Z     PICTURE S9(10)V9(6) SIGN LEADING SEPARATE.
-   02 IN-DIFF  PICTURE V9(5).
-   02 FILLER   PICTURE X(58).
-01 TITLE-LINE.
-   02 FILLER PICTURE X(9) VALUE SPACES.
-   02 FILLER PICTURE X(26) VALUE 'SQUARE ROOT APPROXIMATIONS'.
-01 UNDER-LINE.
-   02 FILLER PICTURE X(44) VALUE 
-      '--------------------------------------------'.
-01 COL-HEADS.
-   02 FILLER PICTURE X(8) VALUE SPACES.
-   02 FILLER PICTURE X(6) VALUE 'NUMBER'.
-   02 FILLER PICTURE X(15) VALUE SPACES.
-   02 FILLER PICTURE X(11) VALUE 'SQUARE ROOT'.
-01 UNDERLINE-2.
-   02 FILLER PICTURE X(20) VALUE ' -------------------'.
-   02 FILLER PICTURE X(5) VALUE SPACES.
-   02 FILLER PICTURE X(19) VALUE '------------------'.
-01 PRINT-LINE.
-   02 FILLER PICTURE X VALUE SPACE.
-   02 OUT-Z  PICTURE Z(11)9.9(6).
-   02 FILLER PICTURE X(5) VALUE SPACES.
-   02 OUT-Y  PICTURE Z(11)9.9(6).
-01 ERROR-MESS.
-   02 FILLER PICTURE X VALUE SPACE.
-   02 OT-Z   PICTURE -(11)9.9(6).
-   02 FILLER PICTURE X(21) VALUE '        INVALID INPUT'.
-01 ABORT-MESS.
-   02 FILLER PICTURE X VALUE SPACE.
-   02 OUTP-Z PICTURE Z(11)9.9(6).
-   02 FILLER PICTURE X(37) VALUE
-      '  ATTEMPT ABORTED,TOO MANY ITERATIONS'.
+identification division.
+program-id. SQRT.
 
-PROCEDURE DIVISION.
-    OPEN INPUT INPUT-FILE, OUTPUT STANDARD-OUTPUT.
-    WRITE OUT-LINE FROM TITLE-LINE AFTER ADVANCING 0 LINES.
-    WRITE OUT-LINE FROM UNDER-LINE AFTER ADVANCING 1 LINE.
-    WRITE OUT-LINE FROM COL-HEADS AFTER ADVANCING 1 LINE.
-    WRITE OUT-LINE FROM UNDERLINE-2 AFTER ADVANCING 1 LINE.
-S1.  
-    READ INPUT-FILE INTO IN-CARD AT END GO TO FINISH.
-    IF IN-Z IS GREATER THAN ZERO GO TO B1.
-    MOVE IN-Z TO OT-Z.
-    WRITE OUT-LINE FROM ERROR-MESS AFTER ADVANCING 1 LINE.
-    GO TO S1.
-B1. 
-    MOVE IN-DIFF TO DIFF.
-    MOVE IN-Z TO Z.
-    DIVIDE 2 INTO Z GIVING X ROUNDED.
-    PERFORM S2 THRU E2 VARYING K FROM 1 BY 1
-        UNTIL K IS GREATER THAN 1000.
-    MOVE IN-Z TO OUTP-Z.
-    WRITE OUT-LINE FROM ABORT-MESS AFTER ADVANCING 1 LINE.
-    GO TO S1.
-S2. 
-    COMPUTE Y ROUNDED = 0.5 * (X + Z / X).
-    SUBTRACT X FROM Y GIVING TEMP.
-    IF TEMP IS LESS THAN ZERO COMPUTE TEMP = - TEMP.
-    IF TEMP / (Y + X) IS GREATER THAN DIFF GO TO E2.
-    MOVE IN-Z TO OUT-Z. 
-    MOVE Y TO OUT-Y.
-    WRITE OUT-LINE FROM PRINT-LINE AFTER ADVANCING 1 LINE.
-    GO TO S1.
-E2. 
-    MOVE Y TO X.
-FINISH.
-    CLOSE INPUT-FILE, STANDARD-OUTPUT. 
-STOP RUN.
+environment division.
+
+input-output section.
+file-control.
+    select inputFile assign to "sqrt.dat"
+        organization is line sequential.
+    select standardOutput assign to display.
+
+data division.
+file section.
+fd inputFile.
+    01 standardInput   pic X(80).
+fd standardOutput.
+    01 outLine         pic X(80).
+
+working-storage section.
+77 diff    pic v9(5).
+77 z       pic 9(11)V9(6).
+77 k       pic s9999.
+77 x       pic 9(11)v9(6).
+77 y       pic 9(11)v9(6).
+77 temp    pic 9(11)v9(6).
+
+01 inCard.
+    02 inZ    pic s9(10)v9(6) sign leading separate.
+    02 inDiff pic v9(5).
+    02 filler pic x(58).
+
+01 titleLine.
+    02 filler pic x(9) value spaces.
+    02 filler pic x(26) value 'Square Root Approximations'.
+
+01 underLine1.
+    02 filler pic x(44) value
+       '--------------------------------------------'.
+
+01 colHeads.
+    02 filler pic x(8) value spaces.
+    02 filler pic x(6) value 'Number'.
+    02 filler pic x(15) value spaces.
+    02 filler pic x(11) value 'Square Root'.
+
+01 underLine2.
+    02 filler pic x(20) value ' -------------------'.
+    02 filler pic x(5) value spaces.
+    02 filler pic x(19) value '------------------'.
+
+01 printLine.
+    02 filler pic x value space.
+    02 outZ pic z(11)9.9(6).
+    02 filler pic x(5) value spaces.
+    02 outY pic z(11)9.9(6).
+
+01 errorMessage.
+    02 filler pic x value space.
+    02 otZ pic -(11)9.9(6).
+    02 filler pic x(21) value '        Invalid Input'.
+
+01 abortMessage.
+    02 filler pic x value space.
+    02 outpZ pic z(11)9.9(6).
+    02 filler pic x(37) value '  Attempt aborted.Too many iterations'.
+
+procedure division.
+    open input inputFile, output standardOutput.
+    write outLine from titleLine after advancing 0 lines.
+    write outLine from underLine1 after advancing 1 line.
+    write outLine from colHeads after advancing 1 line.
+    write outLine from underLine2 after advancing 1 line.
+
+s1.
+    read inputFile into inCard at end go to finish.
+    if inZ is greater than zero go to b1.
+    move inZ to otZ.
+    write outLine from errorMessage after advancing 1 line.
+    go to s1.
+
+b1.
+    move inDiff to diff.
+    move inZ to z.
+    divide 2 into z giving x rounded.
+    perform s2 thru e2 varying k from 1 by 1
+       until k is greater than 1000.
+    move inZ to outpZ.
+    write outLine from abortMessage after advancing 1 line.
+    go to s1.
+
+s2.
+    compute y rounded = 0.5 * (x + z / x).
+    subtract x from y giving temp.
+    if temp is less than zero compute temp = - temp.
+    if temp / (y + x) is greater than diff go to e2.
+    move inZ to outZ.
+    move y to outY.
+    write outLine from printLine after advancing 1 line.
+    go to s1.
+
+e2.
+    move y to x.
+
+finish.
+    close inputFile, standardOutput.
+stop run.
