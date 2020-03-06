@@ -8,3 +8,4 @@ good:
 	./sqrt > outputs/current
 	rm -rf sqrt
 	diff outputs/current outputs/expected
+	echo ~~~~~~~~~~~~~~~~~~~~~
