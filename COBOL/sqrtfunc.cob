@@ -11,15 +11,17 @@ environment division.
 
 data division.
 
-linkage section.
-77 radicand    pic s9(20)v9(10). *> Original number, or N
+working-storage section.
 77 guess       pic s9(20)v9(10). *> First guess, or R0
 77 prevGuess   pic s9(20)v9(10). *> Second guess, or R1
+
+linkage section.
+77 radicand    pic s9(20)v9(10). *> Original number, or N
 77 answer      pic z(20).z(10).  *> Second guess, but formatted
 
 *> ---------------------------Subroutine--------------------------------
 
-procedure division using radicand, guess, prevGuess, answer.
+procedure division using radicand, answer.
 
     *> Our initial guess will be half the input
     divide 2 into radicand giving guess rounded end-divide

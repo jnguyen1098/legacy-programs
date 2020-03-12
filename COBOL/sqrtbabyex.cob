@@ -13,8 +13,6 @@ data division.
 
 working-storage section.
 77 radicand    pic s9(20)v9(10). *> Original number, or N
-77 guess       pic s9(20)v9(10). *> First guess, or R0
-77 prevGuess   pic s9(20)v9(10). *> Second guess, or R1
 77 answer      pic z(20).z(10).  *> Second guess, but formatted
 
 *> --------------------------Main Program-------------------------------
@@ -44,7 +42,7 @@ procedure division.
             display " "
         else
             call "sqrtfunc"
-                using radicand, guess, prevGuess, answer
+                using radicand, answer
             end-call
         end-if
 
