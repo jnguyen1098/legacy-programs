@@ -43,24 +43,9 @@ procedure division.
             display "Invalid input! Re-enter please."
             display " "
         else
-            *> Our initial guess will be half the input
-            divide 2 into radicand giving guess rounded end-divide
-
-            *> Iterate Babylonian sqrt until it is accurate enough
-            perform with test after
-            until function abs(guess - prevGuess) < 0.000001
-                move guess to prevGuess *> Store last guess
-                compute guess rounded = *> Calculate next guess
-                    (prevGuess + radicand / prevGuess) / 2
-                end-compute
-            end-perform
-
-            *> Format the final guess
-            move guess to answer
-
-            *> Display it. We use the trim() function to remove spaces
-            display "Square root is " function trim(answer leading)
-            display " "
+            call "sqrtfunc"
+                using radicand, guess, prevGuess, answer
+            end-call
         end-if
 
     end-perform
@@ -71,5 +56,5 @@ procedure division.
 
     *> Done!
     stop run.
-
+    
 *> ---------------------------------------------------------------------
