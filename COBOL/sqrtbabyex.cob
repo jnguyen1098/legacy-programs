@@ -12,8 +12,12 @@ environment division.
 data division.
 
 working-storage section.
-77 radicand    pic s9(20)v9(10). *> Original number, or N
-77 answer      pic z(20).z(10).  *> Second guess, but formatted
+
+*> The radicand is entered through `userInput`.
+77 userInput   pic s9(20)v9(10).
+
+*> `answer` is used for formatting
+77 answer      pic z(20).z(10).
 
 *> --------------------------Main Program-------------------------------
 
@@ -24,31 +28,34 @@ procedure division.
     display "~                by Jason Nguyen                 ~".
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
-    *> Prompt user for input until they exit by entering 0
-    perform with test after until radicand = 0
+    *> Repeatedly calculate sqrt() until user enters 0
+    perform with test after until userInput = 0
 
-        *> Ask for user input 
+        *> 1. Ask for user input 
         display "Enter number (0 to exit): " with no advancing
-        accept radicand end-accept
+        accept userInput end-accept
 
-        *> Check for 0 (exit)
-        if radicand is = 0 then
-            continue
+        *> 2. Check for 0 (user exit condition)
+        if userInput is = 0 then
+            exit perform
         end-if
 
-        *> Check for negative before proceeding
-        if radicand is < 0 then
+        *> 3. Check for invalid (negative) input
+        if userInput is < 0 then
             display "Invalid input! Re-enter please."
             display " "
         else
-            call "sqrtfunc"
-                using radicand, answer
-            end-call
+            *> 4. Calculate
+            call "squareroot" using userInput, answer
+
+            *> Display answer. trim() removes trailing spaces
+            display "Square root is " function trim(answer leading)
+            display " "
         end-if
 
     end-perform
 
-    *> Program breaks loop and exits on 0
+    *> Exit message for when the user enters 0
     display "Exiting program. Have a great day!"
     display " "
 

@@ -1,11 +1,13 @@
 sqrtbabyex:
-	cobc -x -free -Wall -d sqrtbabyex.cob
-	cobc -m -free -Wall -d sqrtfunc.cob
+	cobc -x -free -W -d sqrtbabyex.cob
+	cobc -m -free -W -d squareroot.cob
 	./sqrtbabyex
-	rm -rf sqrtbabyex
-	rm -rf sqrtfunc.so
+	make clean
 
 sqrtbaby:
-	cobc -x -free -Wall -d sqrtbaby.cob
+	cobc -x -free -W -d sqrtbaby.cob
 	./sqrtbaby
-	rm -rf sqrtbaby
+	make clean
+
+clean:
+	rm -rf sqrtbabyex squareroot.so sqrtbaby
