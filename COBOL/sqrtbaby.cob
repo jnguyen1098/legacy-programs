@@ -33,7 +33,7 @@ procedure division.
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
     *> Repeatedly calculate sqrt() until user enters 0
-    perform calcSqrt with test after until userInput = 0.
+    perform calcSqrt with test after until userInput is = 0.
 
     *> Exit message for when the user enters 0
     display "Exiting program. Have a great day!".
@@ -59,16 +59,17 @@ calcSqrt.
     if userInput is < 0 then
         display "Invalid input! Re-enter please."
         display " "
-    else
-        *> 4. Calculate
-        perform babylon
-
-        *> Display answer. trim() removes trailing spaces
-        display "Square root is ", function trim(answer leading)
-        display " "
+        exit paragraph
     end-if
 
-    *> We are done!
+    *> 4. Calculate
+    perform babylon
+
+    *> 5. Display answer. trim() removes trailing spaces
+    display "Square root is ", function trim(answer leading)
+    display " "
+
+    *> All done!
     exit paragraph.
 
 *> ----------------------Babylonian Algorithm---------------------------
