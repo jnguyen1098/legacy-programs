@@ -13,7 +13,7 @@ data division.
 
 working-storage section.
 
-*> The radicand is entered through `userInput`.
+*> The number is entered through `userInput`.
 77 userInput   pic s9(20)v9(10).
 
 *> `answer` is used for formatting
@@ -28,10 +28,10 @@ procedure division.
     display "~                by Jason Nguyen                 ~".
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
-    *> Repeatedly calculate sqrt() until user enters 0
+    *> Calculate sqrt() until user enters 0, blank input, or EOF
     perform calcSqrt with test after until userInput is = 0.
 
-    *> Exit message for when the user enters 0
+    *> Exit message (will also exit when a non-number is entered)
     display "Exiting program. Have a great day!".
     display " ".
 
@@ -42,28 +42,28 @@ procedure division.
     
 calcSqrt.
 
-    *> 1. Ask for user input 
-    display "Enter number (0 to exit): " with no advancing
-    accept userInput end-accept
+    *> 1. Ask for user input
+    display "Enter number (or 0 to exit): " with no advancing.
+    accept userInput.
 
     *> 2. Check for 0 (user exit condition)
     if userInput is = 0 then
         exit paragraph
-    end-if
+    end-if.
 
     *> 3. Check for invalid (negative) input
     if userInput is < 0 then
-        display "Invalid input! Re-enter please."
+        display "Input must be positive. Re-enter."
         display " "
         exit paragraph
-    end-if
+    end-if.
 
     *> 4. Calculate
-    call "squareroot" using userInput, answer
+    call "squareroot" using userInput, answer.
 
     *> 5. Display answer. trim() removes trailing spaces
-    display "Square root is ", function trim(answer leading)
-    display " "
+    display "Square root is ", function trim(answer leading).
+    display " ".
 
     *> All done!
     exit paragraph. 

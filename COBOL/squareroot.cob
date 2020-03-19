@@ -32,7 +32,7 @@ procedure division using userInput, answer.
 
     *> Iterate Babylonian sqrt until it is accurate enough
     perform with test after
-    until function abs(guess - prevGuess) < 0.000001
+    until function abs(guess - prevGuess) is < 0.000001
         *> Store last guess
         move guess to prevGuess
         *> Calculate next guess
