@@ -14,8 +14,8 @@ data division.
 working-storage section.
 
 *> Temporary variables used for sqrt() iteration
-77 guess       pic s9(20)v9(10) value is zero.
-77 prevGuess   pic s9(20)v9(10) value is zero.
+77 guess       pic s9(20)v9(10).
+77 prevGuess   pic s9(20)v9(10).
 
 linkage section.
 

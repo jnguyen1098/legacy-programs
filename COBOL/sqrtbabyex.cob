@@ -15,10 +15,10 @@ working-storage section.
 
 *> `userInput` is parsed/validated into `radicand`
 77 userInput   pic x(33) value is spaces.
-77 radicand    pic s9(20)v9(11) value is zero.
+77 radicand    pic s9(20)v9(11).
 
 *> `answer` is used for formatting
-77 answer      pic z(20).z(10) value is zero.
+77 answer      pic z(20).z(10).
 
 *> --------------------------Main Program-------------------------------
 

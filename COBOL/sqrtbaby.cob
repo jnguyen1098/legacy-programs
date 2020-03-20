@@ -15,14 +15,14 @@ working-storage section.
 
 *> `userInput` is parsed/validated into `radicand`
 77 userInput   pic x(33) value is spaces.
-77 radicand    pic s9(20)v9(11) value is zero.
+77 radicand    pic s9(20)v9(11).
 
 *> `guess` and `prevGuess` are used for sqrt() iteration
-77 guess       pic s9(20)v9(11) value is zero.
-77 prevGuess   pic s9(20)v9(11) value is zero.
+77 guess       pic s9(20)v9(11).
+77 prevGuess   pic s9(20)v9(11).
 
 *> Used for print formatting
-77 answer      pic z(20).z(11) value is zero.
+77 answer      pic z(20).z(11).
 
 *> --------------------------Main Program-------------------------------
 
