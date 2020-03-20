@@ -33,10 +33,10 @@ procedure division.
     display "~                by Jason Nguyen                 ~".
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
-    *> Repeatedly calculate sqrt() until user enters 0 or q
+    *> Calculate sqrt() for user until they enter 0 or q
     perform calcSqrt until userInput is = "q" or "0".
 
-    *> Exit message (will also exit when a non-number is entered)
+    *> Message to signify program exit
     display "Exiting program. Have a great day!".
     display " ".
 
@@ -51,7 +51,7 @@ calcSqrt.
     display "Enter number ('q' or '0' to exit): " with no advancing.
     accept userInput.
 
-    *> 2. Check for "q" or "0" (user exit condition)
+    *> 2. Check for exit ("q" or "0")
     if userInput is = "q" or "0" then
         exit paragraph
     end-if.
@@ -63,7 +63,7 @@ calcSqrt.
         exit paragraph
     end-if.
 
-    *> 4. Remove whitespace & convert string to number
+    *> 4. Trim trailing spaces & parse string as number
     move function trim(userInput trailing) to radicand.
        
     *> 5. Check if the parsed number is negative
@@ -74,10 +74,13 @@ calcSqrt.
         *> 6. Calculate
         perform babylon
 
-        *> 7. Display answer. trim() removes trailing spaces
+        *> 7. Trim leading spaces and display answer
         display "Square root is ", function trim(answer leading)
         display " "
     end-if.
+
+    *> We are done!
+    exit paragraph.
 
 *> ----------------------Babylonian Algorithm---------------------------
 
@@ -86,9 +89,9 @@ babylon.
     *> Our initial guess will be half the input
     compute guess rounded = radicand / 2.
 
-    *> Iterate Babylonian sqrt until it is accurate enough
-    perform with test after
-    until function abs(guess - prevGuess) is < 0.000001
+    *> Iterate sqrt() until desired precision
+    perform with test after until
+    function abs(guess - prevGuess) is < 0.000001
         *> Store last guess
         move guess to prevGuess
         *> Calculate next guess
