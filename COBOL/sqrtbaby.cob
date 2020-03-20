@@ -13,8 +13,9 @@ data division.
 
 working-storage section.
 
-*> The number is entered through `userInput`.
-77 userInput   pic s9(20)v9(11).
+*> `userInput` is parsed/validated into `radicand`
+77 userInput   pic x(33).
+77 radicand    pic s9(20)v9(11).
 
 *> `guess` and `prevGuess` are used for sqrt() iteration
 77 guess       pic s9(20)v9(11).
@@ -32,8 +33,8 @@ procedure division.
     display "~                by Jason Nguyen                 ~".
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
-    *> Calculate sqrt() until user enters 0, blank input, or EOF
-    perform calcSqrt with test after until userInput is = 0.
+    *> Repeatedly calculate sqrt() until user enters 0 or q
+    perform calcSqrt until userInput is = "q" or "0".
 
     *> Exit message (will also exit when a non-number is entered)
     display "Exiting program. Have a great day!".
@@ -47,37 +48,43 @@ procedure division.
 calcSqrt.
 
     *> 1. Ask for user input
-    display "Enter number (or 0 to exit): " with no advancing.
+    display "Enter number ('q' or '0' to exit): " with no advancing.
     accept userInput.
-       
-    *> 2. Check for 0 (user exit condition)
-    if userInput is = 0 then
+
+    *> 2. Check for "q" or "0" (user exit condition)
+    if userInput is = "q" or "0" then
         exit paragraph
     end-if.
-       
-    *> 3. Check for invalid (negative) input
-    if userInput is < 0 then
-        display "Input must be positive. Re-enter."
+
+    *> 3. Make sure input is numeric
+    if function test-numval-f(userInput) is not = 0 then
+        display "Input is non-numeric. Please re-enter!"
         display " "
         exit paragraph
     end-if.
 
-    *> 4. Calculate
-    perform babylon.
+    *> 4. Remove whitespace & convert string to number
+    move function trim(userInput trailing) to radicand.
+       
+    *> 5. Check if the parsed number is negative
+    if radicand is < 0 then
+        display "Input can't be negative. Please re-enter!"
+        display " "
+    else
+        *> 6. Calculate
+        perform babylon
 
-    *> 5. Display answer. trim() removes trailing spaces
-    display "Square root is ", function trim(answer leading).
-    display " ".
-
-    *> All done!
-    exit paragraph.
+        *> 7. Display answer. trim() removes trailing spaces
+        display "Square root is ", function trim(answer leading)
+        display " "
+    end-if.
 
 *> ----------------------Babylonian Algorithm---------------------------
 
 babylon.
 
     *> Our initial guess will be half the input
-    compute guess rounded = userInput / 2.
+    compute guess rounded = radicand / 2.
 
     *> Iterate Babylonian sqrt until it is accurate enough
     perform with test after
@@ -85,7 +92,7 @@ babylon.
         *> Store last guess
         move guess to prevGuess
         *> Calculate next guess
-        compute guess rounded = (prevGuess + userInput / prevGuess) / 2
+        compute guess rounded = (prevGuess + radicand / prevGuess) / 2
     end-perform.
 
     *> Format the final guess
