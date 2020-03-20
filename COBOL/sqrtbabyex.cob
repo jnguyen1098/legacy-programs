@@ -14,7 +14,7 @@ data division.
 working-storage section.
 
 *> `userInput` is parsed/validated into `radicand`
-77 userInput   pic x(33).
+77 userInput   pic x(33) value spaces.
 77 radicand    pic s9(20)v9(11).
 
 *> `answer` is used for formatting
@@ -45,7 +45,7 @@ calcSqrt.
 
     *> 1. Ask for user input
     display "Enter number ('q' or '0' to exit): " with no advancing.
-    accept userInput.
+    accept userInput end-accept.
 
     *> 2. Exit prompt if "q" or "0"
     if userInput is = "q" or "0" then
@@ -68,7 +68,7 @@ calcSqrt.
         display " "
     else
         *> 6. Calculate
-        call "squareroot" using radicand, answer
+        call "squareroot" using radicand, answer end-call
 
         *> 7. Trim leading spaces and display answer
         display "Square root is ", function trim(answer leading)
