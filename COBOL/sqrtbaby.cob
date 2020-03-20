@@ -51,12 +51,12 @@ calcSqrt.
     display "Enter number ('q' or '0' to exit): " with no advancing.
     accept userInput.
 
-    *> 2. Check for exit ("q" or "0")
+    *> 2. Exit prompt if "q" or "0"
     if userInput is = "q" or "0" then
         exit paragraph
     end-if.
 
-    *> 3. Make sure input is numeric
+    *> 3. Test input to see if numeric (0 = passes test)
     if function test-numval-f(userInput) is not = 0 then
         display "Input is non-numeric. Please re-enter!"
         display " "
@@ -94,7 +94,7 @@ babylon.
     function abs(guess - prevGuess) is < 0.000001
         *> Store last guess
         move guess to prevGuess
-        *> Calculate next guess
+        *> Calculate next guess using last guess
         compute guess rounded = (prevGuess + radicand / prevGuess) / 2
     end-perform.
 

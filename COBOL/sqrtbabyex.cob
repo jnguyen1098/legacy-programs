@@ -13,8 +13,9 @@ data division.
 
 working-storage section.
 
-*> The number is entered through `userInput`.
-77 userInput   pic s9(20)v9(10).
+*> `userInput` is parsed/validated into `radicand`
+77 userInput   pic x(33).
+77 radicand    pic s9(20)v9(11).
 
 *> `answer` is used for formatting
 77 answer      pic z(20).z(10).
@@ -28,10 +29,10 @@ procedure division.
     display "~                by Jason Nguyen                 ~".
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
-    *> Calculate sqrt() until user enters 0, blank input, or EOF
-    perform calcSqrt with test after until userInput is = 0.
+    *> Calculate sqrt() for user until they enter 0 or q
+    perform calcSqrt until userInput is = "q" or "0".
 
-    *> Exit message (will also exit when a non-number is entered)
+    *> Message to signify program exit
     display "Exiting program. Have a great day!".
     display " ".
 
@@ -43,29 +44,38 @@ procedure division.
 calcSqrt.
 
     *> 1. Ask for user input
-    display "Enter number (or 0 to exit): " with no advancing.
+    display "Enter number ('q' or '0' to exit): " with no advancing.
     accept userInput.
 
-    *> 2. Check for 0 (user exit condition)
-    if userInput is = 0 then
+    *> 2. Exit prompt if "q" or "0"
+    if userInput is = "q" or "0" then
         exit paragraph
     end-if.
 
-    *> 3. Check for invalid (negative) input
-    if userInput is < 0 then
-        display "Input must be positive. Re-enter."
+    *> 3. Test input to see if numeric (0 = passes test)
+    if function test-numval-f(userInput) is not = 0 then
+        display "Input is non-numeric. Please re-enter!"
         display " "
         exit paragraph
     end-if.
 
-    *> 4. Calculate
-    call "squareroot" using userInput, answer.
+    *> 4. Trim trailing spaces & parse string as number
+    move function trim(userInput trailing) to radicand.
 
-    *> 5. Display answer. trim() removes trailing spaces
-    display "Square root is ", function trim(answer leading).
-    display " ".
+    *> 5. Check if the parsed number is negative
+    if radicand is < 0 then
+        display "Input can't be negative. Please re-enter!"
+        display " "
+    else
+        *> 6. Calculate
+        call "squareroot" using radicand, answer
 
-    *> All done!
+        *> 7. Trim leading spaces and display answer
+        display "Square root is ", function trim(answer leading)
+        display " "
+    end-if.
+
+    *> We are done!
     exit paragraph. 
 
 *> ---------------------------------------------------------------------
