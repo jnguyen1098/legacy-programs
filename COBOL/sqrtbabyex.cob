@@ -67,7 +67,7 @@ calcSqrt.
         display "Input can't be negative. Please re-enter!"
         display " "
     else
-        *> 6. Calculate
+        *> 6. Calculate using external function
         call "squareroot" using radicand, answer end-call
 
         *> 7. Trim leading spaces and display answer
