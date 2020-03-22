@@ -22,7 +22,7 @@ working-storage section.
 77 prevGuess   pic s9(20)v9(11).
 
 *> Used for print formatting
-77 answer      pic z(20).z(11).
+77 answer      pic z(20).z(6).
 
 *> --------------------------Main Program-------------------------------
 
@@ -30,15 +30,18 @@ procedure division.
 
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
     display "~       Babylonian Square Root Calculator        ~".
-    display "~                by Jason Nguyen                 ~".
+    display "~                                                ~".
+    display "~          Enter positive numbers only!          ~".
+    display "~           To quit, enter 'q' or '0'.           ~".
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
     *> Calculate sqrt() for user until they enter 0 or q
+    display "Enter a number:".
     perform calcSqrt until userInput is = "q" or "0".
 
     *> Message to signify program exit
-    display "Exiting program. Have a great day!".
-    display " ".
+    display "    Exiting program. Thank you for calculating!   ".
+    display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
 
     *> Done!
     stop run.
@@ -48,39 +51,32 @@ procedure division.
 calcSqrt.
 
     *> 1. Ask for user input
-    display "Enter number ('q' or '0' to exit): " with no advancing.
+    display "  √" with no advancing.
     accept userInput end-accept.
 
-    *> 2. Exit prompt if "q" or "0"
-    if userInput is = "q" or "0" then
-        exit paragraph
-    end-if.
+    *> 2. ANSI escape to go back and erase previous line
+    display x"1B" "[2F" x"0A" x"1B" "[K" with no advancing.
 
-    *> 3. Prompt re-entry if non-numeric (0 = proceed)
-    if function test-numval-f(userInput) is not = 0 then
-        display "Input is non-numeric. Please re-enter!"
-        display " "
+    *> 3. Exit prompt if "q" or "0"
+    if userInput is = "q" or "0" then
         exit paragraph
     end-if.
 
     *> 4. Trim trailing spaces & parse string as number
     move function trim(userInput trailing) to radicand.
        
-    *> 5. Prompt re-entry if negative
-    if radicand is < 0 then
-        display "Input can't be negative. Please re-enter!"
-        display " "
-    else
-        *> 6. Calculate
-        perform babylon
-
-        *> 7. Trim leading spaces and display answer
-        display "Square root is ", function trim(answer leading)
-        display " "
+    *> 5. Error if negative or non-numeric input
+    if radicand is <= 0 or function test-numval-f(userInput) is > 0 then
+        display "  Invalid input - positive numbers only!" x"0A"
+        exit paragraph
     end-if.
 
-    *> We are done!
-    exit paragraph.
+    *> 6. Calculate
+    perform babylon.
+
+    *> 7. Trim whitespace and display answer
+    display "  √" function trim(userInput)
+            " = " function trim(answer leading) x"0A".
 
 *> ----------------------Babylonian Algorithm---------------------------
 
@@ -98,10 +94,7 @@ babylon.
         compute guess rounded = (prevGuess + radicand / prevGuess) / 2
     end-perform.
 
-    *> Format the final guess
+    *> Return output
     move guess to answer.
-
-    *> We are done!
-    exit paragraph.
 
 *> ---------------------------------------------------------------------

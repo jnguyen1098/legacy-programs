@@ -39,10 +39,7 @@ procedure division using radicand, answer.
         compute guess rounded = (prevGuess + radicand / prevGuess) / 2
     end-perform.
 
-    *> Format the final guess
+    *> Return output
     move guess to answer.  
-
-    *> We are done!
-    exit paragraph.
 
 *> ---------------------------------------------------------------------

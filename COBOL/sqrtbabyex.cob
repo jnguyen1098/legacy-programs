@@ -52,7 +52,7 @@ calcSqrt.
         exit paragraph
     end-if.
 
-    *> 3. Prompt re-entry if non-numeric (0 = proceed)
+    *> 3. Error if non-numeric (0 = proceed)
     if function test-numval-f(userInput) is not = 0 then
         display "Input is non-numeric. Please re-enter!"
         display " "
@@ -62,7 +62,7 @@ calcSqrt.
     *> 4. Trim trailing spaces & parse string as number
     move function trim(userInput trailing) to radicand.
 
-    *> 5. Prompt re-entry if negative
+    *> 5. Error if negative
     if radicand is < 0 then
         display "Input can't be negative. Please re-enter!"
         display " "
@@ -74,8 +74,5 @@ calcSqrt.
         display "Square root is ", function trim(answer leading)
         display " "
     end-if.
-
-    *> We are done!
-    exit paragraph. 
 
 *> ---------------------------------------------------------------------
