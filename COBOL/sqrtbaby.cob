@@ -22,7 +22,7 @@ working-storage section.
 77 prevGuess   pic s9(20)v9(11).
 
 *> Used for print formatting
-77 answer      pic z(20).z(6).
+77 answer      pic z(19)9.9(6).
 
 *> --------------------------Main Program-------------------------------
 
@@ -54,7 +54,7 @@ calcSqrt.
     display "  √" with no advancing.
     accept userInput end-accept.
 
-    *> 2. ANSI escape to go back and erase previous line
+    *> 2. ANSI terminal escape to clean up system output
     display x"1B" "[2F" x"0A" x"1B" "[K" with no advancing.
 
     *> 3. Exit prompt if "q" or "0"
@@ -62,10 +62,10 @@ calcSqrt.
         exit paragraph
     end-if.
 
-    *> 4. Trim trailing spaces & parse string as number
+    *> 4. Trim trailing spaces & parse input as number
     move function trim(userInput trailing) to radicand.
        
-    *> 5. Error if negative or non-numeric input
+    *> 5. Output error if negative or non-numeric input
     if radicand is <= 0 or function test-numval-f(userInput) is > 0 then
         display "  Invalid input - positive numbers only!" x"0A"
         exit paragraph
