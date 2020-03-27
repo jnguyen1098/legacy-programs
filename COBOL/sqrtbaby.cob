@@ -13,7 +13,7 @@ data division.
 
 working-storage section.
 
-*> `userInput` is parsed/validated into `radicand`
+*> `userInput` is validated and parsed into `radicand`
 77 userInput   pic x(33) value is spaces.
 77 radicand    pic s9(20)v9(11).
 
@@ -34,9 +34,9 @@ procedure division.
     display "~          Enter positive numbers only!          ~".
     display "~           To quit, enter 'q' or '0'.           ~".
     display "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~".
+    display "Enter a number:                                   ".
 
-    *> Calculate sqrt() for user until they enter 0 or q
-    display "Enter a number:".
+    *> Parse user's input until they enter 0 or q
     perform calcSqrt until userInput is = "q" or "0".
 
     *> Message to signify program exit
@@ -50,33 +50,33 @@ procedure division.
 
 calcSqrt.
 
-    *> 1. Ask for user input
+    *> User input
     display "  √" with no advancing.
     accept userInput end-accept.
 
-    *> 2. ANSI terminal escape to clean up system output
+    *> Clean up output (line overwriting using ANSI CSI)
     display x"1B" "[2F" x"0A" x"1B" "[K" with no advancing.
 
-    *> 3. Exit prompt if "q" or "0"
+    *> Don't proceed if "q" or "0"
     if userInput is = "q" or "0" then
         exit paragraph
     end-if.
 
-    *> 4. Trim trailing spaces & parse input as number
+    *> Sanitize user input and parse string as number
     move function trim(userInput trailing) to radicand.
        
-    *> 5. Output error if negative or non-numeric input
+    *> Proceed only if parsed number is valid AND positive
     if radicand is <= 0 or function test-numval-f(userInput) is > 0 then
-        display "  Invalid input - positive numbers only!" x"0A"
+        display "  Invalid input: positive numbers only!" x"0A"
         exit paragraph
+    else
+        *> Proceed on
+        perform babylon
+
+        *> Clean up and print answer line
+        display "  √" function trim(userInput)
+                " = " function trim(answer leading) x"0A"
     end-if.
-
-    *> 6. Calculate
-    perform babylon.
-
-    *> 7. Trim whitespace and display answer
-    display "  √" function trim(userInput)
-            " = " function trim(answer leading) x"0A".
 
 *> ----------------------Babylonian Algorithm---------------------------
 
