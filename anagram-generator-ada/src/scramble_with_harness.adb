@@ -23,7 +23,7 @@ procedure Scramble_With_Harness is
     begin
         File_Name_Check: loop
             -- Prompt user for filename
-            Put("File name to open: ");
+            Put("Please enter a filename, or 'test/sample.txt': ");
             Get_Line(File_Name, Len);
 
             -- Filename testing. Assumed to ask again if loop doesn't break
