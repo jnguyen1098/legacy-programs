@@ -1,14 +1,14 @@
 GFLAGS = -Wall -Wuninitialized -Wunused -gnatwa -gnatw.a -gnatwb -gnatw.b -gnatwc -gnatw.c -gnatwae
 
-main:
-	gnatmake $(GFLAGS) wordscram.adb
-	./wordscram
-	rm -rf wordscram.ali wordscram.o
+harness: src/scramble_with_harness.adb
+	gnatmake $(GFLAGS) src/scramble_with_harness.adb -o bin/scramble
+	cd bin && ./scramble && cd ..
+	make clean
 
-dirty:
-	gnatmake -Wall wordscram.adb
-	./wordscram
-	rm -rf wordscram.ali wordscram.o
+main: src/scramble.adb
+	gnatmake $(GFLAGS) src/scramble.adb -o bin/scramble
+	cd bin && ./scramble && cd ..
+	make clean
 
 clean:
-	rm -rf wordscram.ali wordscram.o
+	rm -rf *.ali *.o bin/scramble

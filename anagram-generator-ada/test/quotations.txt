@@ -1,5 +1,0 @@
-"A" "B" "C" "D" "E" "F" "G"
-"AA" "BB" "CC" "DD" "EE" "FF"
-"AAA" "BBB" "CCC" "DDD" "EEE" "FFF"
-"ABCD" "1234" "QPWO"
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ"

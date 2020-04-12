@@ -6,13 +6,15 @@ c: src/peasant.c
 	make clean
 
 ada: src/peasant.adb
-	gnatmake $(GNATFLAGS) peasant.adb -o bin/peasant
+	gnatmake $(GNATFLAGS) src/peasant.adb -o bin/peasant
 	make run
-	rm -rf russianpmult.ali russianpmult.o
+	make clean
+	rm -rf peasant.ali peasant.o
 
 fortran: src/peasant.f95
 	gfortran -Wall -fcheck=all src/peasant.f95 -o bin/peasant
 	make run
+	make clean
 
 run:
 	./bin/peasant

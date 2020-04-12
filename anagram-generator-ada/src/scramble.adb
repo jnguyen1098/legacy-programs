@@ -8,7 +8,7 @@ with Ada.Numerics.Discrete_Random;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Directories; use Ada.Directories;
 
-procedure Wordscram is
+procedure Scramble is
 
 -------------------------- Main Subprograms ---------------------------
 
@@ -233,6 +233,6 @@ begin
     New_Line;
     Put_Line("Word count: " & Integer'Image(Num_Words));
 
-end Wordscram;
+end Scramble;
 
 -----------------------------------------------------------------------
